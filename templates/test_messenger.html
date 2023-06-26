@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Messenger</title>
+</head>
+<body>
+    <h1>Messenger</h1>
+
+    {% for messenger in messengers %}
+        <h2>{{ messenger.name }}</h2>
+        <p>{{ messenger.description }}</p>
+
+        <h3>Career Centers:</h3>
+        <ul>
+            {% for career_center in messenger.career_centers.all %}
+                <li>{{ career_center.name }}</li>
+            {% endfor %}
+        </ul>
+
+        <h3>Messages:</h3>
+        <ul>
+            {% for message in messenger.messages.all %}
+                <li>{{ message }}</li>
+            {% empty %}
+                <li>No messages.</li>
+            {% endfor %}
+        </ul>
+
+        {% if messenger.messages.count > 0 %}
+            <form action="{% url 'send_message' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="messenger_id" value="{{ messenger.id }}">
+                <label for="person_id">Person ID:</label>
+                <input type="text" id="person_id" name="person_id">
+                <br>
+                <label for="message">Message:</label>
+                <input type="text" id="message" name="message">
+                <br>
+                <input type="submit" value="Send Message">
+            </form>
+        {% else %}
+            <p>No conversations available. Send a message to start a conversation.</p>
+        {% endif %}
+
+        <hr>
+    {% empty %}
+        <p>No messengers available.</p>
+    {% endfor %}
+</body>
+</html>
+
+

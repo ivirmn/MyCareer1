@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+{% load static %}
+<head>
+  <title>Личный кабинет</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link href="/examples/vendors/bootstrap-4/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/js/bootstrap.min.js" integrity="sha512-UR25UO94eTnCVwjbXozyeVd6ZqpaAE9naiEUBK/A+QDbfSTQFhPGj5lOR6d8tsgbBk84Ggb5A3EkjsOgPRPcKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/static/css/mainstyle.css">
+</head>
+
+<body>
+  <div class="top">
+    <div class="container1">
+      <div class="row">
+        <header class="col-sm-5 col-md-6 col-xl-12 header order-md-0 order-xl-1">
+          <img class="main-logo" src="Wikipedia-W-bold-in-square-Clean 1.png" width="65px" height="65px">
+          <input class="search1" placeholder="Search">
+          <form><button class="button_save" id="button_save_editprofile"> <p class=p-myprofilebutton>Редактировать профиль</p> </div>  </form>
+          <form><button class="button_save" id="button_save_exit"> <p class=p-myprofilebutton>Выйти</p> </div> </form> 
+          <img class="profilepic-myprofile" src="{{ user.profile.avatar.url }}"> 
+          <a class="loginname-myprofile">{{ user.username }}</a>
+          <a class="email-myprofile">{{ user.email }}</a> 
+        </header>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- Ваш код для отображения данных профиля -->
+    <!-- Например, вы можете использовать {{ user.profile.field_name }} для отображения полей профиля -->
+  </main>
+
+  <footer>
+    <div class="container footer col-sm-5 col-md-6 col-xl-12 order-md-0 order-xl-1">
+      <img class="footer-1" src="Mask group.png" width="38px" height="38px">
+      <p class="p2023">2023</p>
+    </div>
+  </footer>
+
+  <!-- jQuery -->
+  <script src="/examples/vendors/jquery/jquery-3.3.1.min.js"></script>
+  <!-- Popper -->
+  <script src="/examples/vendors/popper.js/popper.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="/examples/vendors/bootstrap-4/js/bootstrap.min.js"></script>
+</body>
+</html>

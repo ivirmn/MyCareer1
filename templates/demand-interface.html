@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% load static %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>Список заявок</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+    @font-face {
+    font-family: 'Montserrat-Medium';
+    src: url('../fonts/Montserrat-Medium.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+    body {
+    font-family: 'Montserrat-Medium', sans-serif;
+  }
+  
+  </style>
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+  <style src="{% static 'css/demandstyle.css' %}"> </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Редактирование стадии по нажатию на поле
+      $('td.stage').click(function() {
+        var stageCell = $(this);
+        var stage = stageCell.text().trim();
+
+        // Заменяем текст на поле ввода
+        stageCell.html('<input type="text" name="stage" value="' + stage + '">');
+
+        // Фокус на поле ввода
+        stageCell.find('input').focus();
+
+        // Сохранение стадии по нажатию Enter
+        stageCell.find('input').keydown(function(event) {
+          if (event.keyCode === 13) { // Enter key
+            event.preventDefault();
+            var newStage = $(this).val().trim();
+            stageCell.html(newStage);
+          }
+        });
+      });
+
+      // Редактирование результата по нажатию на поле
+      $('td.result').click(function() {
+        var resultCell = $(this);
+        var result = resultCell.text().trim();
+
+        // Заменяем текст на поле ввода
+        resultCell.html('<input type="text" name="result" value="' + result + '">');
+
+        // Фокус на поле ввода
+        resultCell.find('input').focus();
+
+        // Сохранение результата по нажатию Enter
+        resultCell.find('input').keydown(function(event) {
+          if (event.keyCode === 13) { // Enter key
+            event.preventDefault();
+            var newResult = $(this).val().trim();
+            resultCell.html(newResult);
+          }
+        });
+      });
+    });
+  </script>
+  <script>
+    $(document).ready(function() {
+      // Функция для обработки сортировки по выбранной колонке
+      function sortTable(column) {
+        var rows = $('#demandsTable tbody tr').get();  // Получение строк таблицы
+        rows.sort(function(a, b) {
+          var aValue = $(a).children('td').eq(column).text().toUpperCase();
+          var bValue = $(b).children('td').eq(column).text().toUpperCase();
+          return aValue.localeCompare(bValue);  // Сравнение значений для сортировки
+        });
+        $('#demandsTable tbody').empty().append(rows);  // Обновление таблицы с отсортированными строками
+      }
+
+      // Обработчик клика по заголовку колонки для сортировки
+      $('th.sortable').click(function() {
+        var columnIndex = $(this).index();
+        sortTable(columnIndex);
+      });
+
+      // Обработчик клика по кнопке "Сбросить сортировку"
+      $('#resetSortButton').click(function() {
+        location.reload();  // Перезагрузка страницы для сброса сортировки
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Информационная система центра карьеры ВГУ</h1>
+  <h2>Всего заявок: {{ counter.count }}</h2>
+  <button id="resetSortButton">Сбросить сортировку</button>
+  {% if demands %}
+  <table id="demandsTable">
+    <thead>
+      <tr>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Дата</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Причина</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Salary</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Have WhatsApp</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Have Viber</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Have Telegram</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Факультет</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Цель</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Стадия</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Результат</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for demand in demands %}
+        <tr>
+          <td>{{  demand.date_created|date:"Y-m-d H:i"  }} </td>
+          <td>{{ demand.reason }}</td>
+          <td>{{ demand.salary }}</td>
+          <td>{{ demand.have_whatsapp.username }}</td>
+          <td>{{ demand.have_viber.username }}</td>
+          <td>{{ demand.have_telegram.username }}</td>
+          <td>{{ demand.faculty }}</td>
+          <td>{{ demand.target }}</td>
+          <td class="stage" style="cursor: pointer;">{{ demand.stage }}</td>
+          <td class="result" style="cursor: pointer;">{{ demand.result }}</td>
+          <td>
+            <form method="post" action="{% url 'delete_demand' demand.id %}">
+              {% csrf_token %}
+              <input type="submit" value="Delete">
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+    <div style="text-align: center; margin-top: 50px;">
+      <h3>Нет активных заявок</h3>
+    </div>
+{% endif %}
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Админский интерфейс</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <h1>Админский интерфейс</h1>
+  <table>
+    <tr>
+      <th>Дата заявки</th>
+      <th>ФИО</th>
+      <th>Контактный телефон</th>
+      <th>Наличие мессенджеров</th>
+      <th>Статус</th>
+      <th>Цель обращения</th>
+      <th>Стадия</th>
+      <th>Результат</th>
+      <th>Пометки админа</th>
+    </tr>
+     Здесь будет генерироваться содержимое таблицы с помощью Django-шаблонов или JavaScript -->
+  </table>
+</body>
+</html> 

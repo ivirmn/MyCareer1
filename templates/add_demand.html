@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Добавить заявку</title>
+  <style>
+    .label-highlight {
+      color: orange;
+    }
+  </style>
+</head>
+<body>
+  <h1>Добавить заявку</h1>
+  <form id="add-demand-form" method="POST">
+    {% csrf_token %}
+    <label for="reason" class="label-highlight">Причина:</label>
+    <input type="text" name="reason" id="reason" required><br><br>
+
+    <label for="target" class="label-highlight">Цель:</label>
+    <textarea name="target" id="target" required></textarea><br><br>
+
+    <input type="submit" value="Добавить заявку">
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#add-demand-form').submit(function(e) {
+        e.preventDefault(); // Предотвращаем обычное поведение формы
+
+        // Получаем значения полей формы
+        var reason = $('#reason').val();
+        var target = $('#target').val();
+
+        // Создаем объект данных для отправки на сервер
+        var data = {
+          'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+          reason: reason,
+          target: target
+        };
+
+        // Отправляем данные на сервер
+        $.ajax({
+          url: '/add_demand/', // Укажите URL-адрес, на который будет отправлен запрос
+          method: 'POST',
+          data: data,
+          success: function(response) {
+            // Обработка успешного ответа от сервера
+            console.log(response);
+            alert('Заявка успешно создана!');
+          },
+          error: function(xhr, textStatus, errorThrown) {
+            // Обработка ошибки
+            console.error(xhr.responseText);
+            alert('Ошибка при создании заявки. Пожалуйста, попробуйте еще раз.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+
