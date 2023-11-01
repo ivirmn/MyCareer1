@@ -33,4 +33,49 @@
   h1 {
     font-family: 'Montserrat-Medium', sans-serif;
   }
-  
+
+.activeTable {
+  max-width:93,5%;
+}
+thead {
+  background-color:#FFAD00;
+}
+
+
+  #demandsTable {
+    table-layout: fixed;
+  }
+
+  #demandsTable td {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Стили для верхней менюшки */
+#top-menu {
+  height: 30px;
+  background-color: #FFAD00;
+}
+
+#top-menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  border-spacing: 2px;
+}
+
+#top-menu li {
+  display: inline-block;
+}
+
+#top-menu a {
+  display: inline-block;
+  padding: 6px 10px;
+  text-decoration: none;
+  color: #333;
+  border-right: 2px solid #ddd;
+}
+
+#top-menu a:last-child {
+  border-right: none;
+}

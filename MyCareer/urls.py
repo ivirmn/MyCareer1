@@ -17,11 +17,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from api import views
-from api.views import messenger_test, job_search, vacancy_detail, ExportDemandsCSVView, ExportDemandsExcelView, \
-    update_demand, delete_demand, error_403, error_500, error_502
+from api.views import export_demands_csv, export_active_demands_csv, export_inactive_demands_csv,  \
+    update_demand, delete_demand, error_403, error_500, error_502, archive_demand, register_user
 from django.contrib.auth.views import LoginView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import LogoutView
+
 
 handler403 = 'api.views.error_403'
 handler500 = 'api.views.error_500'
@@ -41,31 +44,52 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('alldemands/', admin.site.urls),
-    path('add_demand/', views.AddDemandView.as_view(), name='add_demand'),
+   # path('add_demand/', views.AddDemandView.as_view(), name='add_demand'),
+    path('create-demand/', views.create_demand, name='create_demand'),
     path('index/', views.index, name='index'),
-    path('testtemplate.html', views.test_template, name='testtemplate'),
-    path('vacancy_form.html', views.VacancyCreateView.as_view(), name='create_vacancy'),
-    path('vacancytest.html', views.vacancy_list, name='vacancy_list'),
-    path('profile.html', views.see_user_profile, name='profile'),
-    path('export-demands-csv/', ExportDemandsCSVView.as_view(), name='export_demands_csv'),
-    path('export-demands-excel/', ExportDemandsExcelView.as_view(), name='export_demands_excel'),
+    path('', views.index, name='index'),
+    #path('testtemplate.html', views.test_template, name='testtemplate'),
+    path('registration/', views.register_user, name='register'),
+    path('my-demands/', views.my_demands, name='my-demands'),
+    #path('vacancy_form.html', views.VacancyCreateView.as_view(), name='create_vacancy'),
+   # path('vacancytest.html', views.vacancy_list, name='vacancy_list'),
+    path('profile', views.see_user_profile, name='profile'),
+    # path('profile/update/', update_profile, name='update_profile'),
+    path('export-demands-csv/', views.export_demands_csv, name='export_demands_csv'),
+    path('export-active-demands-csv/', views.export_active_demands_csv, name='export_active_demands_csv'),
+    path('export-inactive-demands-csv/', views.export_inactive_demands_csv, name='export_inactive_demands_csv'),
+    #path('export-demands-excel/', ExportDemandsExcelView.as_view(), name='export_demands_excel'),
     path('editprofile.html', views.edit_user_profile, name='editprofile'),
-    path('vacancy/<int:vacancy_id>/', vacancy_detail, name='vacancy_detail'),
-    path('regtest.html', views.create_user_profile, name='create_profile'),
-    path('test_profile.html', views.see_user_profile, name='see_user_profile'),
-    path('test-messenger.html', messenger_test, name='messenger_test'),
-    path('send-message/', views.send_message, name='send_message'),
-    path('registration-plug.html/', views.registration_plug, name='registration_plug'),
-    path('messenger-test.html/', views.messenger_test, name='messenger_test'),
-    path('employer-registration.html', views.employer_registration, name='employer_registration'),
-    path('applicant-registration.html', views.applicant_registration, name='applicant_registration'),
-    path('send-message/', views.send_message, name='send_message'),
+   # path('vacancy/<int:vacancy_id>/', vacancy_detail, name='vacancy_detail'),
+   # path('regtest.html', views.create_user_profile, name='create_profile'),
+   # path('test_profile.html', views.see_user_profile, name='see_user_profile'),
+   # path('test-messenger.html', messenger_test, name='messenger_test'),
+   # path('send-message/', views.send_message, name='send_message'),
+   # path('registration-plug.html/', views.registration_plug, name='registration_plug'),
+   # path('messenger-test.html/', views.messenger_test, name='messenger_test'),
+   # path('employer-registration.html', views.employer_registration, name='employer_registration'),
+   # path('applicant-registration.html', views.applicant_registration, name='applicant_registration'),
+    path('about-us', views.about_us, name='about_us'),
+    path('for-student', views.for_student, name='for_student'),
+    path('for-employer', views.for_employer, name='for_employer'),
+    path('contacts', views.contacts, name='contacts'),
+   # path('send-message/', views.send_message, name='send_message'),
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
-    path('test-search.html', job_search, name='search_test'),
+    path('logout/', LogoutView.as_view(template_name='logout.html'), name='logout'),
+    path('admin-test', views.admin_test, name='admintest'),
+    #path('test-search.html', job_search, name='search_test'),
     path('swagger<str:format>', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('demand-interface/', views.demand_interface, name='demand_interface'),
+    path('admin-help/', views.admin_help, name='admin_help'),
     path('update-demand/<int:demand_id>/', update_demand, name='update_demand'),
     path('delete-demand/<int:demand_id>/', delete_demand, name='delete_demand'),
+    path('archive-demand/<int:demand_id>/', views.archive_demand, name='archive_demand'),
+    path('surveys/', views.surveys, name='surveys'),
+    path('survey/<int:survey_id>/', views.take_survey, name='take_survey'),
+    path('create_survey/', views.create_survey, name='create_survey'),
+    path('edit_survey/<int:survey_id>/', views.edit_survey, name='edit_survey'),
+    path('survey_master/', views.survey_master, name='survey_master'),
+    path('edit_survey/<int:survey_id>/delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
 ]
