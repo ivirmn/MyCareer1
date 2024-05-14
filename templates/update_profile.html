@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Изменение данных пользователя</title>
+  <style>
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input[type="submit"] {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Изменение данных пользователя</h1>
+  <form method="POST" action="/profile/update/">
+    {% csrf_token %}
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+
+    <label for="surname">Фамилия:</label>
+    <input type="text" id="surname" name="surname" value="{{ user.surname }}" required>
+
+    <label for="firstname">Имя:</label>
+    <input type="text" id="firstname" name="firstname" value="{{ user.firstname }}" required>
+
+    <label for="patronymic">Отчество:</label>
+    <input type="text" id="patronymic" name="patronymic" value="{{ user.patronymic }}" required>
+
+    <label for="phonenumber">Номер телефона:</label>
+    <input type="tel" id="phonenumber" name="phonenumber" value="{{ user.phonenumber }}" required>
+
+    <label for="have_whatsapp">Наличие WhatsApp:</label>
+    <input type="checkbox" id="have_whatsapp" name="have_whatsapp" {% if user.have_whatsapp %}checked{% endif %}>
+
+    <label for="have_telegram">Наличие Telegram:</label>
+    <input type="checkbox" id="have_telegram" name="have_telegram" {% if user.have_telegram %}checked{% endif %}>
+
+    <label for="have_viber">Наличие Viber:</label>
+    <input type="checkbox" id="have_viber" name="have_viber" {% if user.have_viber %}checked{% endif %}>
+
+    <label for="faculty">Факультет:</label>
+    <select id="faculty" name="faculty" required>
+      <option value="" disabled selected>Выберите факультет</option>
+      <option value="биолого-почвенный" {% if user.faculty == 'биолого-почвенный' %}selected{% endif %}>Биолого-почвенный</option>
+      <!-- Добавьте остальные варианты факультетов здесь -->
+    </select>
+
+    <label for="course">Курс:</label>
+    <select id="course" name="course" required>
+      <option value="" disabled selected>Выберите курс</option>
+      <option value="1" {% if user.course == 1 %}selected{% endif %}>1</option>
+      <!-- Добавьте остальные варианты курсов здесь -->
+    </select>
+
+    <input type="submit" value="Сохранить">
+  </form>
+</body>
+</html>

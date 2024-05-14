@@ -1,0 +1,80 @@
+{% extends "base_article.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Прохождение опроса {{ survey.title }}{% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        textarea, input[type="radio"], input[type="checkbox"] {
+            margin-top: 5px;
+        }
+        label {
+            display: block;
+        }
+        input[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    <div class="container">
+        <h1>{{ survey.title }}</h1>
+        <p>{{ survey.short_description }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for question in survey.question_set.all %}
+                <div class="question">
+                    <p>{{ question.text }}</p>
+                    {% if question.question_type == 'text' %}
+                        <textarea name="question_{{ question.id }}" rows="4" cols="50"></textarea>
+                    {% elif question.question_type == 'single_choice' %}
+                        {% for choice in question.choice_set.all %}
+                            <label>
+                                <input type="radio" name="question_{{ question.id }}" value="{{ choice.id }}">
+                                {{ choice.text }}
+                            </label>
+                        {% endfor %}
+                    {% elif question.question_type == 'multiple_choice' %}
+                        {% for choice in question.choice_set.all %}
+                            <label>
+                                <input type="checkbox" name="question_{{ question.id }}" value="{{ choice.id }}">
+                                {{ choice.text }}
+                            </label>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    {% endblock %}
+</body>
+</html>

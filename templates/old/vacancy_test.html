@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>Vacancy List</title>
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+</head>
+<body>
+    <h1>Vacancy List</h1>
+    <ul>
+    {% for vacancy in vacancies %}
+        <li>
+            <h2>{{ vacancy.title }}</h2>
+            <p><strong>Description:</strong> {{ vacancy.short_description }}</p>
+            <p><strong>Main Description:</strong> {{ vacancy.main_description }}</p>
+            <p><strong>Salary:</strong> {{ vacancy.salary }}</p>
+            <img src="{{ vacancy.main_image.url }}" alt="Main Image">
+            <h3>Additional Images:</h3>
+            <ul>
+            {% for image in vacancy.additional_images.all %}
+                <li><img src="{{ image.image.url }}" alt="Additional Image"></li>
+            {% empty %}
+                <li>No additional images.</li>
+            {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

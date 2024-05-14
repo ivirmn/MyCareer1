@@ -1,0 +1,24 @@
+{% extends "base_admin.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер опросов</title>
+</head>
+<body>
+    {% block content %}
+    <h2>Мастер опросов</h2>
+    <p>Всего опросов - {{ total_surveys }}</p>
+    <ul>
+        {% for survey in surveys %}
+            <li>
+                {{ survey.title }} - {{ survey.description }}
+                <a href="{% url 'edit_survey' survey.id %}">Редактировать</a>
+                <a href="{% url 'survey_answers' survey.id %}">Посмотреть ответы</a>
+            </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+</body>
+</html>

@@ -17,14 +17,16 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from api import views
-from api.views import export_demands_csv, export_active_demands_csv, export_inactive_demands_csv,  \
-    update_demand, delete_demand, error_403, error_500, error_502, archive_demand, register_user
+from api.views import export_demands_csv, export_active_demands_csv, export_inactive_demands_csv,update_demand, delete_demand, error_403, error_500, error_502, archive_demand, register_user
 from django.contrib.auth.views import LoginView
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
+from api.urls import *
 
+from blog.views import *
+from social_api.views import *
 
 handler403 = 'api.views.error_403'
 handler500 = 'api.views.error_500'
@@ -86,10 +88,23 @@ urlpatterns = [
     path('update-demand/<int:demand_id>/', update_demand, name='update_demand'),
     path('delete-demand/<int:demand_id>/', delete_demand, name='delete_demand'),
     path('archive-demand/<int:demand_id>/', views.archive_demand, name='archive_demand'),
-    path('surveys/', views.surveys, name='surveys'),
-    path('survey/<int:survey_id>/', views.take_survey, name='take_survey'),
-    path('create_survey/', views.create_survey, name='create_survey'),
-    path('edit_survey/<int:survey_id>/', views.edit_survey, name='edit_survey'),
-    path('survey_master/', views.survey_master, name='survey_master'),
-    path('edit_survey/<int:survey_id>/delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
+   # path('surveys/', views.surveys, name='surveys'),
+   # path('survey/<int:survey_id>/', views.take_survey, name='take_survey'),
+    #path('create-survey/', views.create_survey, name='create_survey'),
+   # path('edit-survey/<int:survey_id>/', views.edit_survey, name='edit_survey'),
+    path('survey-master/', views.survey_master, name='survey_master'),
+   # path('edit-survey/<int:survey_id>/delete-question/<int:question_id>/', views.delete_question, name='delete_question'),
+   # path('take-survey/<int:survey_id>/', views.take_survey, name='take_survey'),
+    path('article-editor/', views.article_editor, name='article_editor'),
+    path('tos/', views.tos, name='tos'),
+    path('survey/', include('survey.urls')),
+    #path('survey/<int:survey_id>/answers/', views.survey_answers, name='survey_answers'),
+   # path('survey/<int:survey_id>/answers/<int:user_id>/', views.user_answers, name='user_answers'),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('social_api/', include('social_api.urls')),
+    #path('post/<slug:slug>/', BlogDetailView.as_view(), name='post_detail'),
+        #include blog paths
+    path('', include('blog.urls')),
+    path('', include('survey_helper.urls')),
+    path('api/', include('api.urls')),
 ]

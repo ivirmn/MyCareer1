@@ -9,7 +9,7 @@ from rest_framework import generics
 # from MyCareer.serializers import VacancySerializer
 from MyCareer.forms import UserProfileEditForm, DemandForm, RegistrationForm
 from MyCareer.forms import UserProfile, SurveyForm, QuestionForm, EditQuestionForm
-from MyCareer.models import Demand, Counter, Survey, Question
+from MyCareer.models import Demand, Counter, Survey, Question, Answer
 from django.views import View
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.permissions import IsAuthenticated
@@ -17,6 +17,8 @@ import csv
 from django.http import HttpResponse, JsonResponse
 from openpyxl import Workbook
 from datetime import datetime
+
+from api.serializers import UserProfileSerializer
 
 
 # def vacancy_list(request):
@@ -260,18 +262,35 @@ def demand_interface(request):
     return render(request, 'demand-interface.html', context)
 
 
+# def update_demand(request, demand_id):
+#     demand = Demand.objects.get(id=demand_id)
+#     if request.method == 'POST':
+#         stage = request.POST.get('stage')
+#         result = request.POST.get('result')
+#
+#         demand.stage = stage
+#         demand.result = result
+#         demand.save()
+#
+#     return redirect('demand_interface')
+
 def update_demand(request, demand_id):
-    demand = Demand.objects.get(id=demand_id)
-    if request.method == 'POST':
-        stage = request.POST.get('stage')
-        result = request.POST.get('result')
+    if request.method == "POST":
+        new_stage = request.POST.get('stage')
+        new_result = request.POST.get('result')
+        new_comment = request.POST.get('comment')
 
-        demand.stage = stage
-        demand.result = result
-        demand.save()
+        try:
+            demand = Demand.objects.get(pk=demand_id)
+            demand.stage = new_stage
+            demand.result = new_result
+            demand.comment = new_comment
+            demand.save()
+            return JsonResponse({'success': True})
+        except Demand.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Заявка не найдена'})
 
-    return redirect('demand_interface')
-
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
 
 def delete_demand(request, demand_id):
     demand = Demand.objects.get(id=demand_id)
@@ -367,7 +386,10 @@ def export_active_demands_csv(request):
 
         return response
 
-
+@user_passes_test(lambda u: u.is_superuser)
+def article_editor(request):
+    return render(request, 'article-editor.html')
+    return render(request, 'article-editor.html')
 @user_passes_test(lambda u: u.is_superuser)
 def export_inactive_demands_csv(request):
     def get(self, request):
@@ -493,6 +515,8 @@ def my_demands(request):
 def admin_help(request):
     return render(request, 'admin-help.html')
 
+def tos(request):
+    return render(request, 'tos.html')
 
 def register_user(request):
     if request.method == 'POST':
@@ -640,7 +664,54 @@ def delete_question(request, survey_id, question_id):
     if request.method == 'POST':
         # Удаление вопроса
         question.delete()
-        return redirect('edit_survey', survey_id=survey_id)  # Используем survey_id
+        return redirect('edit-survey', survey_id=survey_id)  # Используем survey_id
 
     # Возвращаем шаблон подтверждения удаления
-    return render(request, 'delete_question.html', {'question': question})
+    return render(request, 'delete-question.html', {'question': question})
+
+
+from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def take_survey(request, survey_id):
+    survey = get_object_or_404(Survey, id=survey_id)
+
+    if request.method == 'POST':
+        for question in survey.question_set.all():
+            answer_data = request.POST.getlist('question_' + str(question.id))
+
+            if answer_data:
+                # Создаем объект Answer для этого вопроса
+                answer = Answer(question=question, user_profile=request.user)
+
+                # Остальной код обработки ответов остается без изменений
+
+                answer.save()
+
+    return render(request, 'take-survey.html', {'survey': survey})
+
+def survey_answers(request, survey_id):
+    survey = Survey.objects.get(pk=survey_id)
+    users_with_answers = Answer.objects.filter(question__survey=survey).values('user_profile').distinct()
+    users_and_answers = []
+
+    for user_with_answer in users_with_answers:
+        user_profile_id = user_with_answer['user_profile']
+        user_profile = UserProfile.objects.get(pk=user_profile_id)
+        users_and_answers.append({'user_profile': user_profile})
+
+    return render(request, 'survey_answers.html', {'survey': survey, 'users_and_answers': users_and_answers})
+
+def user_answers(request, user_id, survey_id):
+    user_answers = Answer.objects.filter(user_profile=user_id, question__survey=survey_id)
+    user_profile = user_answers.first().user_profile
+
+    return render(request, 'user_answers.html', {'user_answers': user_answers, 'user_profile': user_profile})
+
+
+
+#restapi
+class UserProfileDetailView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer

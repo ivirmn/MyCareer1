@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Debug Blog</title>
+</head>
+<body>
+    <h1>Debug Blog</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="post_id">ID записи:</label>
+        <input type="text" name="post_id" id="post_id">
+        <button type="submit">Отправить</button>
+    </form>
+    {% if text %}
+        <h2>Текст записи:</h2>
+        <pre>{{ text }}</pre>
+        <h2>Картинки:</h2>
+        {% for img in images %}
+            <img src="{{ img }}" alt="">
+        {% endfor %}
+        <h2>Теги:</h2>
+        <p>{{ tags_str }}</p>
+    {% endif %}
+</body>
+</html>

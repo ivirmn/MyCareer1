@@ -1,0 +1,16 @@
+{% extends "base_article.html" %}
+<h1>Посты с тегом "{{ tag.name }}"</h1>
+<!doctype html>
+<html lang="ru">
+    <head>
+    </head>
+<body>
+    {% block content %}
+{% for post in posts %}
+    <h2>{{ post.title }}</h2>
+    <p>{{ post.content }}</p>
+    <!-- Другие поля поста... -->
+{% endfor %}
+{% endblock %}
+</body>
+</html>

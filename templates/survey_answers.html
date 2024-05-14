@@ -1,0 +1,29 @@
+{% extends "base_admin.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... -->
+</head>
+<body>
+    {% block content %}
+    <h2>Ответы на опрос</h2>
+    <h3>{{ survey.title }}</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Индивидуальные ответы</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user_and_answers in users_and_answers %}
+                <tr>
+                    <td>{{ user_and_answers.user_profile.get_full_name }}</td>
+                    <td><a href="{% url 'user_answers' user_and_answers.user_profile.id survey.id %}">Посмотреть ответы</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+</body>
+</html>

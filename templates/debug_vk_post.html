@@ -1,0 +1,45 @@
+{% block content %}
+  <h1>Отправка тестового поста в ВКонтакте</h1>
+
+  {% if vk_token and vk_group_id %}
+    <h2>Текущий токен и ID группы</h2>
+    <p>VK Token: {{ vk_token }}</p>
+    <p>VK Group ID: {{ vk_group_id }}</p>
+  {% endif %}
+
+  {% if vk_user_id and vk_user_name and vk_user_lastname %}
+    <h2>Авторизованный пользователь</h2>
+    <p>ID: {{ vk_user_id }}</p>
+    <p>Имя: {{ vk_user_name }}</p>
+    <p>Фамилия: {{ vk_user_lastname }}</p>
+  {% endif %}
+
+  {% if vk_auth_info %}
+    <h2>Данные авторизации</h2>
+    <pre>{{ vk_auth_info}}</pre>
+  {% endif %}
+
+  
+    <h2>Ответ сервера VK</h2>
+    <pre>{{ vk_response}}</pre>
+  
+
+  {% if vk_request_url %}  {# Проверьте, существует ли URL запроса #}
+    <h2>URL запроса на данные авторизации</h2>
+    <p>{{ vk_request_url }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <label for="{{ form.title.id_for_label }}">Заголовок:</label>
+    {{ form.title }}
+    <br>
+
+    <label for="{{ form.content.id_for_label }}">Содержимое:</label>
+    {{ form.content }}
+    <br>
+
+    <button type="submit">Отправить пост</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% load static %}
+  <title>Список заявок</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #FFAD00;
+    }
+    
+    @font-face {
+      font-family: 'Montserrat-Medium';
+      src: url('../fonts/Montserrat-Medium.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Montserrat-Medium', sans-serif;
+    }
+  
+  </style>
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'css/demandstyle.css' %}">
+  </head>
+  <body>
+<h1> Как экспортировать данные в табличном виде </h1>
+    1) Нажмите на Экспорт в CSV
+    <br>
+    2) Откройте скачаный файл в Excel. Его название в формате "demand_год_месяц_день_часы_минуты_секунды.csv"
+    <br>
+    3) Данные-получить данные-из файла-CSV
+    <br>
+    4) Получившиеся данные можно сохранить как xlsx-файл, редактировать или просто хранить у себя.
+  </body>
+
+  </html>

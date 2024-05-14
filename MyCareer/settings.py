@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-x4bxk+-@x3h68hk79%hznrtxsj&kzkzq1*8(49!$hte)rxvsvt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,7 +40,15 @@ INSTALLED_APPS = [
     'drf_yasg',
     'MyCareer',
     'dbbackup',
-    'api'
+    'api',
+    'blog',
+    'ckeditor',
+    'ckeditor_uploader',
+    'bootstrapform',
+    'survey',
+    'survey_helper',
+    'EmailBulletin',
+    'social_api'
 ]
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': '/my/backup/dir/'}
@@ -53,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 CSRF_COOKIE_SECURE = True  # Если используете HTTPS
@@ -118,6 +127,11 @@ AUTHENTICATION_BACKENDS = [
 
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = [
+    ('en', ('English')),
+    ('ru', ('Russian')),
+]
+
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
@@ -132,7 +146,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
-
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+CKEDITOR_UPLOAD_PATH = "uploads/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="ru">
+{% load static %}
+<head>
+    <title>Студенту</title>
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="{% static 'scripts/search.js' %}"></script>
+    <script src="{% static 'scripts/get_articles.js' %}"></script>
+    <script src="{% static 'scripts/get_topics.js' %}"></script>
+    <script type="text/javascript" src="https://vk.com/js/api/openapi.js?168"></script>
+
+    <style>
+        .container {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .container1 {
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        body {
+            margin: 0 0 0 0;
+            background-color: #F6F9FD;
+        }
+
+        .header {
+            background-color: #FFFFFF;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+            height: 144px;
+        }
+
+        .footer {
+          height: 102px;
+    background-color: #f9e050;
+        }
+
+
+        .header,
+        .footer {
+            color: #fff;
+        }
+
+        .main-logo {
+          margin: 0px 0 40px 34px;
+        }
+
+        @font-face {
+            font-family: 'Montserrat-Medium';
+            src: url({% static 'fonts/Montserrat-Medium.ttf' %}) format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Montserrat-Regular';
+            src: url({% static 'fonts/Montserrat-Regular.ttf' %}) format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Montserrat-Light';
+            src: url({% static 'fonts/Montserrat-Light.ttf' %}) format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Montserrat-SemiBold';
+            src: url({% static 'fonts/Montserrat-SemiBold.ttf' %}) format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .but1 {
+            position: relative;
+            margin-left: 85%;
+            background: #f9e050;
+            border-radius: 25px;
+            bottom: 82%;
+            border-color: #f9e050;
+            border: 1px;
+            width: 165px;
+            height: 50px;
+            font-size: 18px;
+            font-family: 'Montserrat-Medium', sans-serif;
+            color: #FFFFFF;
+        }
+
+        .search1 {
+            position: absolute;
+            outline: none;
+            left: 76%;
+            margin-top: 3.4%;
+            width: 230px;
+            height: 39px;
+
+        }
+
+        .search1 {
+
+            border: none;
+            border-bottom: 2px solid #2558B8;
+            font-size: 16px;
+            font-family: 'Montserrat-Medium', sans-serif;
+
+        }
+
+        .footer-1 {
+            margin-top: 1.3%;
+        }
+
+        .p2023 {
+            font-size: 16px;
+            margin-top: -0,1%;
+            font-family: 'Montserrat-Medium', sans-serif;
+        }
+
+
+        h3 {
+            margin: 30px 0 0 23px;
+            padding-bottom: 24px;
+            color: white;
+            font-size: 36px;
+            font-family: 'Montserrat-Medium', sans-serif;
+        }
+        #beacon-light {
+            color: black;
+            font-size: 12px;
+            font-family: 'Montserrat-Medium', sans-serif;
+            left: 11%;
+            position:relative;
+            top: 68%;
+        }
+
+        a {
+            font-family: 'Montserrat-Regular', sans-serif;
+            text-decoration: none;
+        }
+        .profile-info-wrapper {
+          font-size: 25px;
+          font-family: 'Montserrat-Medium', sans-serif;
+        }
+        .line {
+            width: 140px;
+            height: 0px;
+            margin-left: 23px;
+            border: 1.5px solid #FFFFFF;
+        }
+
+        .down-topic {
+            margin-left: 23px;
+            font-size: 20px;
+            font-family: 'Montserrat-Regular', sans-serif;
+            color: white;
+            font-family: 'Montserrat-Medium', sans-serif;
+        }
+
+        .menu-bar1 {
+            vertical-align: top;
+            width: 193px;
+            height: 353px;
+            margin-left: 6%;
+
+            background: #2558B8;
+            box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.15);
+            border-radius: 25px;
+
+        }
+
+        .article1 {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding-top: 36px;
+            vertical-align: top;
+            width: 513px;
+            height: 597px;
+            margin-left: 20px;
+            background: #FFFFFF;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+            border-radius: 25px;
+        }
+
+        .article2 {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding-top: 36px;
+            vertical-align: top;
+            width: 513px;
+            height: 597px;
+            margin-left: 20px;
+            background: #FFFFFF;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+            border-radius: 25px;
+        }
+
+        h1 {
+            margin-top: 36px;
+            margin-left: 31px;
+            font-family: 'Montserrat-Medium', sans-serif;
+            font-size: 26px;
+            padding-bottom: 10px;
+        }
+        #headername {
+            color: #000000;
+            margin-top: 2%;
+            margin-bottom: 0px;
+            margin-left:11% !important;
+            position: absolute;
+        }
+
+        .h-f, .h-s {
+            margin-top: 36px;
+            margin-left: 31px;
+            font-family: 'Montserrat-SemiBold', sans-serif;
+            font-size: 26px;
+            padding-bottom: 10px;
+            color: black;
+        }
+
+        .line1 {
+            margin-top: 14px;
+            width: 256px;
+            height: 0px;
+            margin-left: 31px;
+            border: 2px solid #2558B8;
+        }
+
+        .main-text {
+            height: 442px;
+            font-size: 16px;
+            width: 410px;
+            margin-left: 31px;
+            margin-top: 24px;
+            font-family: 'Montserrat-Regular', sans-serif;
+            line-height: 160%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+        }
+
+        .main-text1 {
+            height: 442px;
+            font-size: 16px;
+            width: 410px;
+            margin-left: 31px;
+            margin-top: 24px;
+            font-family: 'Montserrat-Regular', sans-serif;
+            line-height: 160%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+        }
+
+        .but1337 {
+            margin-left: -20px;
+        }
+
+        #result {
+            list-style-type: none;
+            position: absolute;
+            width: 300px;
+            max-width: 300px;
+            cursor: pointer;
+            overflow-y: auto;
+            max-height: 400px;
+            box-sizing: border-box;
+            z-index: 1001;
+            margin-left: 1110px;
+            margin-top: -45px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .link-class {
+            background-color: white;
+        }
+
+        .link-class:hover {
+            background-color: rgba(37, 88, 184, 0.45);
+
+        }
+
+        .search-item {
+            color: black;
+        }
+        
+        /* Стили для кнопки "вверх" */
+        #btnUp {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            z-index: 99;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            background-color: #555;
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 4px;
+        }
+            .back-button {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      display: none;
+        }
+
+        
+
+    
+    #telegram-widget {
+        position:relative;
+        top:20px; 
+      width: 280px;
+      height: 60px;
+      background-color: #0088cc;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      border-radius: 4px;
+    }
+
+    #telegram-widget a {
+      position:relative;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+      top: 16px;
+      font-size: 22px;
+    }
+    #left-column-wrapper {
+        margin-left: 31px;
+    }
+
+    #facultetus-button {
+        position:relative;
+        top:40px; 
+        width: 300px;
+      height: 60px;
+      background-image: linear-gradient(to right, #FFAD00, #FF4C00);
+      border: none;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    #facultetus-button a {
+    position:relative;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      font-size: 16px;
+      top: 16px;
+      font-size: 22px;
+    }
+
+    /* Стили для горизонтального меню */
+    .horizontal-menu {
+      display: flex;
+    }
+
+    .horizontal-menu li {
+      margin-right: 20px;
+      list-style: none;
+    }
+
+    /* Стили для вертикального списка подпунктов */
+    .vertical-submenu {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      padding: 10px;
+    }
+
+    /* Стили для кнопки меню */
+    .menu-button {
+      display: none;
+    }
+
+    /* Медиа-запрос для адаптивности */
+    @media (max-width: 768px) {
+      .horizontal-menu {
+        display: none;
+      }
+
+      .vertical-menu {
+        display: block;
+      }
+
+      .menu-button {
+        display: block;
+      }
+    }
+
+    /*----- Toggle Button -----*/
+.toggle-nav {
+	display:none;
+}
+
+/*----- Menu -----*/
+@media screen and (min-width: 960px) {
+	.menu {
+        position:relative;
+	width:30%;
+	padding:10px 18px;
+	box-shadow:0px 1px 1px rgba(0,0,0,0.15);
+	border-radius:3px;
+	/* background:#303030; */
+    bottom:160%;
+    left:50%;
+	}
+}
+
+.menu ul {
+	display:inline-block;
+}
+
+.menu li {
+	margin:0px 50px 0px 0px;
+	float:left;
+	list-style:none;
+	font-size:17px;
+}
+
+.menu li:last-child {
+	margin-right:0px;
+}
+
+.menu a {
+	text-shadow:0px 1px 0px rgba(0,0,0,0.5);
+	color:#777;
+	transition:color linear 0.15s;
+}
+
+.menu a:hover, .menu .current-item a {
+	text-decoration:none;
+	color:#66a992;
+}
+
+/*----- Search -----*/
+.search-form {
+	float:right;
+	display:inline-block;
+}
+
+.search-form input {
+	width:200px;
+	height:30px;
+	padding:0px 8px;
+	float:left;
+	border-radius:2px 0px 0px 2px;
+	font-size:13px;
+}
+
+.search-form button {
+	height:30px;
+	padding:0px 7px;
+	float:right;
+	border-radius:0px 2px 2px 0px;
+	background:#66a992;
+	font-size:13px;
+	font-weight:600;
+	text-shadow:0px 1px 0px rgba(0,0,0,0.3);
+	color:#fff;
+}
+
+/*----- Responsive -----*/
+@media screen and (max-width: 1150px) {
+	.wrap {
+		width:90%;
+	}
+}
+
+@media screen and (max-width: 970px) {
+	.search-form input {
+		width:120px;
+	}
+}
+
+@media screen and (max-width: 960px) {
+	.menu {
+		position:relative;
+		display:inline-block;
+	}
+
+	.menu ul.active {
+		display:none;
+	}
+
+	.menu ul {
+		width:100%;
+		position:absolute;
+		top:120%;
+		left:0px;
+		padding:10px 18px;
+		box-shadow:0px 1px 1px rgba(0,0,0,0.15);
+		border-radius:3px;
+		background:#303030;
+	}
+
+	.menu ul:after {
+		width:0px;
+		height:0px;
+		position:absolute;
+		top:0%;
+		left:22px;
+		content:'';
+		transform:translate(0%, -100%);
+		border-left:7px solid transparent;
+		border-right:7px solid transparent;
+		border-bottom:7px solid #303030;
+	}
+
+	.menu li {
+		margin:5px 0px 5px 0px;
+		float:none;
+		display:block;
+	}
+
+	.menu a {
+		display:block;
+	}
+
+	.toggle-nav {
+        position:absolute;
+        left:90%;
+        bottom:90%;
+		padding:20px;
+		float:left;
+		display:inline-block;
+		box-shadow:0px 1px 1px rgba(0,0,0,0.15);
+		border-radius:3px;
+		background:#303030;
+		text-shadow:0px 1px 0px rgba(0,0,0,0.5);
+		color:#777;
+		font-size:20px;
+		transition:color linear 0.15s;
+	}
+
+	.toggle-nav:hover, .toggle-nav.active {
+		text-decoration:none;
+		color:#66a992;
+	}
+
+	.search-form {
+		margin:12px 0px 0px 20px;
+		float:left;
+	}
+
+	.search-form input {
+		box-shadow:-1px 1px 2px rgba(0,0,0,0.1);
+	}
+}
+
+.content-block {
+    position: absolute;
+    top: 170px; /* Отступ сверху */
+    left: 340px; /* Отступ слева */
+    right: 0; /* Отступ справа */
+    padding-top: 20px; /* Отступ сверху */
+    padding-bottom: 20px; /* Отступ снизу */
+    background-color: #FFFFFF; /* Цвет фона блока */
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15); /* Тень блока */
+    border-radius:5px;
+    font-family: 'Montserrat-Medium', sans-serif;
+}
+
+@media screen and (max-width: 900px) {
+    .content-block {
+        position: relative;
+        top: unset;
+        left: unset;
+        right: unset;
+        margin-left: 0;
+        margin-top: 50px;
+    }
+    
+    #left-column {
+        margin-top: 20px;
+    }
+}
+
+.warning {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	display: none;
+	justify-content: center;
+	width: 100%;
+	padding: 30px;
+	box-sizing: border-box;
+	background-color: yellow;
+}
+
+.warning--active {
+	display: flex;
+}
+
+.warning__text {
+	margin-right: 30px;
+}
+
+.warning__read {
+	display: block;
+	margin-left: 15px;
+}
+.loginbuttontext {
+    color: black;
+}
+    </style>
+</head>
+
+<body>
+    <button id="btnUp" onclick="scrollToTop()">Вверх</button>
+    <a href="#" class="back-button">Назад</a>
+    <script>
+        // Показывает или скрывает кнопку "вверх" в зависимости от прокрутки страницы
+        window.onscroll = function() {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            var btnUp = document.getElementById("btnUp");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                btnUp.style.display = "block";
+            } else {
+                btnUp.style.display = "none";
+            }
+        }
+
+        // Прокручивает страницу вверх при нажатии на кнопку "вверх"
+        function scrollToTop() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+
+        
+    var backButton = document.querySelector('.back-button');
+    backButton.addEventListener('click', function() {
+      history.back();
+    });
+    </script>
+
+<script>
+    jQuery(document).ready(function() {
+	jQuery('.toggle-nav').click(function(e) {
+		jQuery(this).toggleClass('active');
+		jQuery('.menu ul').toggleClass('active');
+
+		e.preventDefault();
+	});
+});
+
+
+  </script>
+<script>
+    // скрипт скрытия
+    var collapsibles = document.querySelectorAll('.collapsible');
+
+    collapsibles.forEach(function(collapsible) {
+      collapsible.addEventListener('click', function() {
+        var content = this.nextElementSibling;
+        content.classList.toggle('hidden');
+      });
+    });
+// конец скрипта скрытия
+</script>
+<!-- NAV #1 и HEADER -->
+<div class="top">
+    <div class="container1">
+        <div class="row">
+            <!-- HEADER -->
+            <header class="col-md-6 col-xl-12 header order-md-0 order-xl-1">
+                <h1 id="headername" font-color="black"> Центр развития карьеры ВГУ</h1>
+                <p id="beacon-light"> Твой карьерный путь начинается там, где загорается свет нашего маяка</p>
+                <a href="{% url 'index' %}"><img class="main-logo"
+                                                 src="{% static 'img/career.jpg' %}"
+                                                 width="85px"
+                                                 height="85px"></a>
+                                                 <a class="but1337" href="{% url 'login' %}">
+                                                    {% if user.is_authenticated %}
+                                                                                 <a class="but1337" href="{% url 'logout' %}">
+                                                                                   <button class="but1"><a class="loginbuttontext" href="{% url 'logout' %}">Выход</a></button>
+                                                                                 </a>
+                                                                               {% else %}
+                                                                                 <a class="but1337" href="{% url 'login' %}">
+                                                                                   <button class="but1"><a class="loginbuttontext" href="{% url 'login' %}">Вход</a></button>
+                                                                                 </a>
+                                                                               {% endif %}
+                <nav class="menu">
+                    <ul class="active">
+                        <li class="current-item"><a href="/index">Главная</a></li>
+                        <li><a href="/about-us">О нас</a></li>
+                        <li><a href="/for-employer">Работодателю</a></li>
+                        <li><a href="/for-student">Студенту</a></li>
+                        <li><a href="/contacts">Контакты</a></li>
+                        <li><a href="/profile">Личный кабинет</a></li>
+                    </ul>
+                
+                    <a class="toggle-nav" href="#">&#9776;</a>
+                
+                <!--    <form class="search-form">
+                        <input type="text">
+                        <button>Search</button>
+                    </form> -->
+                </nav>
+               <!-- <input type="text" name="search" id="search" class="search1" placeholder="Search">
+                <ul class="list-group" id="result"></ul> -->
+                
+            </header>
+        </div>
+    </div>
+</div>
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<main>
+    <div id="left-column">
+        <h1> Мы ВКонтакте</h1>
+    <div id="left-column-wrapper">
+    <div id="vk_groups"></div>
+    <script type="text/javascript">
+      VK.Widgets.Group("vk_groups", {mode: 4, wide: 1, height: 400, color1: "FFFFFF", color2: "000000", color3: "5181B8"}, 61583550);
+    </script>
+    <div id="telegram-widget">
+        <a href="https://t.me/vsucareer" target="_blank">Подписаться в Telegram</a>
+      </div>
+      <div id="facultetus-button"> <a href="https://www.facultetus.ru/university/vsu"> Факультетус </a> </div>
+      </div>
+    </div>
+    <div class="content-block">
+        <h1> Студенту</h1> <br> <br>
+ Центр развития карьеры и бизнес-сотрудничества ВГУ предлагает новые вакансии от партнеров. Подробности в группе ВКонтакте.       
+
+</div>
+    <br><br><br><br>
+  <!--  <div class="menu-bar1 col-md-6 col-xl-12 order-md-0 order-xl-1" style="display: inline-block;">
+        <h3>Темы</h3>
+        <a id="1"></a>
+        <br><br>
+        <a id="2"></a>
+        <br><br>
+        <a id="3"></a>
+        <br><br>
+        <a id="4"></a>
+        <br>
+        <br>
+        <div class="line"></div>
+        <br>
+        <a class="down-topic" href="">Все тематики</a>
+        <br>
+    </div>
+    <div class="article1" style="display: inline-block;">
+        <a class="h-f" id="h-f"></a>
+        <div class="line1"></div>
+        <p class="main-text1" id="main-text1"></p>
+
+    </div>
+    <div class="article2 col-md-6 col-xl-12 order-md-0 order-xl-1" style="display: inline-block;">
+        <a class="h-s" id="h-s"></a>
+        <div class="line1"></div>
+        <p class="main-text" id="main-text"></p>
+
+    </div>
+    <br><br><br><br><br><br>
+</main>
+-->
+<!-- <div id="cookie-warning">
+    Мы используем файлы cookie для улучшения работы сайта. Нажимая "Соглашаюсь", вы соглашаетесь с использованием файлов cookie.
+    <button id="cookie-accept">Соглашаюсь</button>
+  </div> -->
+<footer>
+    <div class="container footer">
+        <p class="p2023">Made with love at CSF VSU in 2023. Contact: <a id="mailto" href="mailto:vsucareer@gmail.com"> vsucareer@gmail.com </a> </p>
+    </div>
+</footer>
+
+
+</body>
+
+
+</html>

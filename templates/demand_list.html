@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список заявок</title>
+</head>
+<body>
+    <h1>Список заявок</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Email</th>
+                <th>Факультет</th>
+                <th>Курс</th>
+                <th>Цель</th>
+                <th>Результат</th>
+                <th>Комментарий</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for demand in demands %}
+            <tr>
+                <td>{{ demand.user_profile.get_full_name }}</td>
+                <td>{{ demand.user_profile.email }}</td>
+                <td>{{ demand.user_profile.faculty }}</td>
+                <td>{{ demand.user_profile.course }}</td>
+                <td contenteditable="true" data-field="target" data-demand-id="{{ demand.id }}">{{ demand.target }}</td>
+                <td contenteditable="true" data-field="result" data-demand-id="{{ demand.id }}">{{ demand.result }}</td>
+                <td contenteditable="true" data-field="comment" data-demand-id="{{ demand.id }}">{{ demand.comment }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var editableCells = document.querySelectorAll('[contenteditable="true"]');
+            
+            editableCells.forEach(function(cell) {
+                cell.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+
+                        var newValue = cell.textContent.trim();
+                        var demandId = cell.getAttribute('data-demand-id');
+                        var field = cell.getAttribute('data-field');
+
+                        fetch(`/update-demand/${demandId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ field: field, value: newValue })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                console.log('Данные успешно обновлены');
+                            } else {
+                                console.error('Произошла ошибка при обновлении данных');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Произошла ошибка при отправке данных');
+                        });
+                    }
+                });
+            });
+
+            function getCookie(name) {
+                var value = "; " + document.cookie;
+                var parts = value.split("; " + name + "=");
+                if (parts.length === 2) return parts.pop().split(";").shift();
+            }
+        });
+    </script>
+</body>
+</html>

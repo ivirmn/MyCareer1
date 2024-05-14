@@ -1,0 +1,43 @@
+{% block content %}
+  <h1>Отправка тестового поста в Telegram</h1>
+
+  {% if tg_token %}
+    <h2>Текущий токен Telegram</h2>
+    <p>Telegram Token: {{ tg_token }}</p>
+  {% endif %}
+
+  
+    <h2>Авторизованный пользователь</h2>
+    <p>ID: {{ tg_user_id }}</p>
+    <p>Имя: {{ tg_user_name }}</p>
+    <p>Фамилия: {{ tg_user_lastname }}</p>
+  
+
+  {% if tg_auth_info %}
+    <h2>Данные авторизации</h2>
+    <pre>{{ tg_auth_info}}</pre>
+  {% endif %}
+
+  {% if tg_response %}
+    <h2>Ответ сервера Telegram</h2>
+    <pre>{{ tg_response}}</pre>
+  {% endif %}
+
+  {% if tg_request_url %}  {# Проверьте, существует ли URL запроса #}
+    <h2>URL запроса на данные авторизации</h2>
+    <p>{{ tg_request_url }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <label for="{{ form.title.id_for_label }}">Заголовок:</label>
+    {{ form.title }}
+    <br>
+
+    <label for="{{ form.content.id_for_label }}">Содержимое:</label>
+    {{ form.content }}
+    <br>
+
+    <button type="submit">Отправить пост</button>
+  </form>

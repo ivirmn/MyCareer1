@@ -1,5 +1,7 @@
 from django.contrib import admin
 from . import models
+from django.utils.translation import activate
+activate('en-us')
 admin.site.register(models.UserProfile)
 #admin.site.register(models.CareerCenter)
 #admin.site.register(models.Vacancy)

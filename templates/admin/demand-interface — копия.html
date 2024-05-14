@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% load static %}
+  <title>Список заявок</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    th {
+      background-color: #FFAD00;
+    }
+
+    td.sortable {
+      cursor: pointer;
+    }
+    
+    @font-face {
+      font-family: 'Montserrat-Medium';
+      src: url('../fonts/Montserrat-Medium.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Montserrat-Medium', sans-serif;
+    }
+  
+  </style>
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="{% static 'css/demandstyle.css' %}">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      // Функция для обработки редактирования ячейки
+      function editCell(cell) {
+        var value = cell.text().trim();
+
+        // Заменяем текст на поле ввода
+        cell.html('<textarea>' + value + '</textarea>');
+
+        // Фокус на поле ввода
+        var textarea = cell.find('textarea');
+        textarea.focus();
+
+        // Сохранение значения по нажатию Enter
+        textarea.keydown(function(event) {
+          if (event.keyCode === 13) { // Enter key
+            event.preventDefault();
+            var newValue = $(this).val().trim();
+            cell.html(newValue);
+            saveCell(cell, newValue);
+          }
+        });
+      }
+
+      // Функция для сохранения значения ячейки
+      function saveCell(cell, newValue) {
+            var demandId = cell.closest('tr').data('demand-id');
+            var columnName = cell.data('column-name');
+
+            // Отправка AJAX-запроса для сохранения значения в базе данных
+            $.post('/update-demand/' + demandId + '/', {
+                column_name: columnName,
+                new_value: newValue
+            }, function(data) {
+                // Обработка успешного сохранения значения
+                // Здесь можно выполнить дополнительные действия при необходимости
+                console.log('Значение успешно обновлено: ' + newValue);
+            }).fail(function() {
+                // Обработка неудачного выполнения запроса
+                console.log('Не удалось обновить значение: ' + newValue);
+            });
+        }
+
+
+      // Редактирование стадии по нажатию на поле
+      $('td.stage').click(function() {
+        var stageCell = $(this);
+        var stage = stageCell.text().trim();
+
+        // Заменяем текст на поле ввода
+        stageCell.html('<textarea name="stage">' + stage + '</textarea>');
+
+        // Фокус на поле ввода
+        var stageTextarea = stageCell.find('textarea');
+        stageTextarea.focus();
+
+        // Сохранение стадии по нажатию Enter
+        stageTextarea.keydown(function(event) {
+          if (event.keyCode === 13) { // Enter key
+            event.preventDefault();
+            var newStage = $(this).val().trim();
+            stageCell.html(newStage);
+            saveCell(stageCell, newStage); // Сохраняем значение
+          }
+        });
+      });
+
+      // Редактирование результата по нажатию на поле
+      $('td.result').click(function() {
+        var resultCell = $(this);
+        var result = resultCell.text().trim();
+
+        // Заменяем текст на поле ввода
+        resultCell.html('<textarea name="result">' + result + '</textarea>');
+
+        // Фокус на поле ввода
+        var resultTextarea = resultCell.find('textarea');
+        resultTextarea.focus();
+
+        // Сохранение результата по нажатию Enter
+        resultTextarea.keydown(function(event) {
+          if (event.keyCode === 13) { // Enter key
+            event.preventDefault();
+            var newResult = $(this).val().trim();
+            resultCell.html(newResult);
+            saveCell(resultCell, newResult); // Сохраняем значение
+          }
+        });
+      });
+    });
+</script>
+
+
+<script>
+  $(document).ready(function() {
+    $(document).ready(function() {
+    // Скрыть активные заявки и показать кнопку "Показать активные заявки"
+    $('#hideActiveButton').click(function() {
+      $('.active-row').hide();
+      $('#hideActiveButton').hide();
+      $('#showActiveButton').show();
+    });
+
+    // Показать архивные заявки и показать кнопку "Скрыть архивные заявки"
+    $('#showArchiveButton').click(function() {
+      $('#archiveTable').show();
+      $('#showArchiveButton').hide();
+      $('#hideArchiveButton').show();
+    });
+
+    // Скрыть архивные заявки и показать кнопку "Показать архивные заявки"
+    $('#hideArchiveButton').click(function() {
+      $('#archiveTable').hide();
+      $('#hideArchiveButton').hide();
+      $('#showArchiveButton').show();
+    });
+  });
+
+    // Сбросить сортировку по нажатию на кнопку
+    $('#resetSortButton').click(function() {
+      $('.sortable img').attr('src', '{% static 'img/sort-up.svg' %}');
+    });
+
+    // Сортировка по столбцам
+    $('th.sortable').click(function() {
+      var column = $(this).index();
+      var table = $(this).closest('table');
+      var rows = table.find('tbody > tr').get();
+
+      // Обновление значка сортировки
+      $('.sortable img').attr('src', '{% static 'img/sort-up.svg' %}');
+      $(this).find('img').attr('src', '{% static 'img/sort-down.svg' %}');
+
+      rows.sort(function(a, b) {
+        var aValue = $(a).find('td').eq(column).text().trim().toLowerCase();
+        var bValue = $(b).find('td').eq(column).text().trim().toLowerCase();
+        return aValue.localeCompare(bValue);
+      });
+
+      $.each(rows, function(index, row) {
+        table.children('tbody').append(row);
+      });
+    });
+  });
+</script>
+
+</head>
+<body>
+  <div id="top-menu">
+    <ul>
+      <li><a href="/">Главная</a></li>
+      <li><a href="/profile">Профиль</a></li>
+      <li><a href="/admin-help">Помощь</a></li>
+      <li><a href="/export-demands-csv">Экспорт в CSV</a></li>
+      <li><a href="/admin">Django Admin</a></li>
+      <li><a href="/article-editor">Редактор статей</a></li>
+      <li><a href="/logout">Выйти из системы</a></li>
+    </ul>
+  </div>
+  
+  <h1>Информационная система центра карьеры ВГУ</h1>
+<h2>Всего заявок: {{ counter.count }}</h2>
+<button id="resetSortButton">Сбросить сортировку</button>
+<!-- <button id="showArchiveButton">Показать архивированные заявки</button> -->
+<button id="hideActiveButton">Скрыть активные заявки</button>
+<button id="showActiveButton" style="display: none;">Показать активные заявки</button>
+<button id="hideArchiveButton" style="display: none;">Скрыть архивные заявки</button>
+
+
+{% if demands %}
+  <h2>Активные заявки:</h2>
+  <table id="activeTable">
+    <thead>
+      <tr>
+       <!-- <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">ID</th> -->
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Дата</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Имя</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Номер телефона, e-mail</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Мессенджеры</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Факультет, курс</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Цель</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Стадия</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Результат</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Комментарий</th>
+        <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for demand in demands %}
+      {% if not demand.is_archived %}
+        <tr class="active-row">
+    <!--       <td>{{ demand.id }}</td> -->
+          <td>{{ demand.date_created|date:"Y-m-d H:i" }}</td>
+          <td>{{ demand.user_profile.firstname }} {{ demand.user_profile.surname }} {{ demand.user_profile.patronymic }}</td>
+          <td><a href="tel:{{ demand.user_profile.phonenumber }}">{{ demand.user_profile.phonenumber }} </a> <br> <a href="mailto:{{ demand.user_profile.email }}">{{ demand.user_profile.email }}</a></td>
+          <td>
+            {% if demand.user_profile.have_viber %} Viber, {% endif %}
+            {% if demand.user_profile.have_telegram %} Telegram, {% endif %}
+            {% if demand.user_profile.have_whatsapp %} <a href="https://wa.me/{{ demand.user_profile.phonenumber }}">WhatsApp</a> {% endif %}
+          </td>
+          <td>{{ demand.user_profile.faculty }}, {{ demand.user_profile.course }} курс </td>
+          <td>{{ demand.target }}</td>
+          <td class="stage" style="cursor: pointer;">{{ demand.stage }}</td>
+          <td class="result" style="cursor: pointer;">{{ demand.result }}</td>
+          <td class="comment" style="cursor: pointer;">{{ demand.comment }}</td>
+          <td>
+            <a href="{% url 'delete_demand' demand.id %}" class="delete">Удалить</a>
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% elif demands %}
+
+
+
+  <h2>Архивированные заявки:</h2>
+  <table id="archiveTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Дата</th>
+        <th>Salary</th>
+        <th>Номер телефона</th>
+        <th>Have WhatsApp</th>
+        <th>Have Viber</th>
+        <th>Have Telegram</th>
+        <th>Факультет</th>
+        <th>Цель</th>
+        <th>Стадия</th>
+        <th>Результат</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for demand in archive_demands %}
+        <tr>
+          <td>{{ demand.date_created|date:"Y-m-d H:i" }}</td>
+          <td>{{ demand.salary }}</td>
+          <td>{{ demand.phonenumber }}</td>
+          <td>{{ demand.have_whatsapp.username }}</td>
+          <td>{{ demand.have_viber.username }}</td>
+          <td>{{ demand.have_telegram.username }}</td>
+          <td>{{ demand.faculty }}</td>
+          <td>{{ demand.target }}</td>
+          <td>{{ demand.stage }}</td>
+          <td>{{ demand.result }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div style="text-align: center; margin-top: 50px;">
+    <h3>Нет активных заявок</h3>
+  </div>
+{% endif %}
+</body>
+</html> 

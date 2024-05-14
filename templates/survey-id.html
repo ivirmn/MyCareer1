@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Survey Response Detail</title>
+</head>
+<body>
+    <h1>Survey Response Detail</h1>
+    {% if response %}
+        <p>ID: {{ response.id }}</p>
+        <p>Created: {{ response.created }}</p>
+        <p>Updated: {{ response.updated }}</p>
+        <p>Interview UUID: {{ response.interview_uuid }}</p>
+        <p>Survey ID: {{ response.survey_id }}</p>
+        <p>User ID: {{ response.user_id }}</p>
+    {% else %}
+        <p>No data available for the specified survey and user.</p>
+    {% endif %}
+</body>
+</html>

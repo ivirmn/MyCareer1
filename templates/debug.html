@@ -1,0 +1,10 @@
+<form method="post">
+    {% csrf_token %}
+    <label for="post_id">ID записи:</label>
+    <input type="text" name="post_id" id="post_id">
+    <button type="submit">Отправить</button>
+</form>
+
+{% if text %}
+    <p>{{ text }}</p>
+{% endif %}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Создание вакансии</title>
+</head>
+<body>
+  <h1>Создание вакансии</h1>
+  <form id="vacancy-form" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="title">Заголовок:</label>
+    <input type="text" name="title" id="title" required><br><br>
+
+    <label for="short-description">Краткое описание:</label>
+    <textarea name="short-description" id="short-description" required></textarea><br><br>
+
+    <label for="main-description">Основное описание:</label>
+    <textarea name="main-description" id="main-description" required></textarea><br><br>
+
+    <label for="salary">Зарплата:</label>
+    <input type="number" name="salary" id="salary" step="0.01" required><br><br>
+
+    <label for="main-image">Основное изображение:</label>
+    <input type="file" name="main-image" id="main-image" required><br><br>
+
+    <label for="additional-images">Дополнительные изображения:</label>
+    <input type="file" name="additional-images" id="additional-images" multiple><br><br>
+
+    <input type="submit" value="Создать вакансию">
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#vacancy-form').submit(function(e) {
+        e.preventDefault(); // Предотвращаем обычное поведение формы
+
+        // Создаем объект FormData для передачи данных формы
+        var formData = new FormData(this);
+
+        // Отправляем данные на сервер
+        $.ajax({
+          url: '/create_vacancy/', // URL-адрес обработчика на сервере
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function(response) {
+            // Действия после успешной отправки данных
+            alert('Вакансия успешно создана!');
+          },
+          error: function(xhr, status, error) {
+            // Действия при возникновении ошибки
+            alert('Произошла ошибка при создании вакансии.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+  {# Укажите базовый шаблон, если он есть #}
+  {% extends 'base_admin.html' %}
+  {% block content %}
+  <h1>Ввод токенов автопостинга</h1>
+
+  {% if vk_token_instance and tg_token_instance %}  {# Проверьте, существуют ли экземпляры токенов #}
+    <h2>Текущие токены и ID группы</h2>
+    <p>VK Token: {{ vk_token_instance.VkTokenAutopost }}</p>
+    <p>VK Group ID: {{ vk_token_instance.VkGroupId }}</p>
+    <p>TG Token: {{ tg_token_instance.TgTokenAutopost }}</p>
+    <p>TG Channel ID: {{ tg_token_instance.TgChannelId }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <h2>VK API</h2>
+    {{ vk_form.as_p }}
+
+    <h2>TG API</h2>
+    {{ tg_form.as_p }}
+
+    <button type="submit">Сохранить</button>
+  </form>
+{% endblock %}

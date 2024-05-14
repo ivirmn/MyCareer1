@@ -1,0 +1,19 @@
+{% extends "base_article.html" %}
+<html>
+<head>
+    <title>Доступные анкеты</title>
+</head>
+<body>
+    {% block content %}
+    <h2>Доступные анкеты</h2>
+    <ul>
+        {% for survey in surveys %}
+            <li>
+                <a href="{% url 'take_survey' survey.id %}">{{ survey.title }}</a><br>
+                {{ survey.description }}<br>
+            </li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
+</body>
+</html>

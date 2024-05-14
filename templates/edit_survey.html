@@ -1,0 +1,147 @@
+{% extends "base_admin.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Survey</title>
+</head>
+<body>
+    {% block content %}
+    <h1>Edit Survey</h1>
+<p>Всего вопросов: {{ question_count }}</p>
+    <!-- Форма для редактирования параметров опроса -->
+    <form method="POST" id="survey-form">
+        {% csrf_token %}
+        {{ survey_form.as_p }}
+
+        <!-- Кнопка "Сохранить" для параметров опроса -->
+        <button type="submit" name="save_survey">Сохранить опрос</button>
+    </form>
+
+    <!-- Отображаем существующие вопросы -->
+<ul id="questions-list">
+    {% for question in questions %}
+        <li>
+            <!-- Вопрос и его тип -->
+            {{ question.text }} ({{ question.get_question_type_display }})
+
+            <!-- Кнопка "Редактировать" для вопроса -->
+            <button class="edit-question" data-question-id="{{ question.id }}">Редактировать</button>
+
+            <!-- Форма редактирования вопроса (скрыта по умолчанию) -->
+            <form class="edit-question-form" data-question-id="{{ question.id }}" style="display: none;" method="POST">
+                <!-- Здесь будет форма для редактирования вопроса -->
+                {% csrf_token %}
+                {{ edit_question_form.text.label_tag }}
+                <input type="text" name="text" value="{{ question.text }}">
+                {{ edit_question_form.is_mandatory.label_tag }}  <!-- Галочка "Этот вопрос обязательный" -->
+                <input type="checkbox" name="is_mandatory" {% if edit_question_form.is_mandatory.value %}checked{% endif %} value="0">
+                {{ edit_question_form.question_type }}
+                <input type="hidden" name="edit_question_id" value="{{ question.id }}">
+                <button type="submit">Сохранить изменения</button>
+
+                <!-- Кнопка "Удалить" для вопроса -->
+                <button class="delete-question" data-question-id="{{ question.id }}">Удалить</button>
+            </form>
+        </li>
+    {% endfor %}
+</ul>
+
+    <!-- Форма для добавления нового вопроса -->
+    <form method="POST">
+        {% csrf_token %}
+        {{ question_form.as_p }}
+
+        <button type="submit" name="add_question">Добавить вопрос</button>
+        <button type="button" id="add-more-questions">Добавить еще</button>
+    </form>
+
+    <!-- Кнопка "Закрыть" для формы добавления нового вопроса -->
+<button class="close-form">Закрыть</button>
+
+    <script>
+      // JavaScript-код для отображения формы редактирования вопроса при нажатии кнопки "Редактировать"
+    const editButtons = document.querySelectorAll('.edit-question');
+    editButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const questionId = button.getAttribute('data-question-id');
+            const editForm = document.querySelector(`.edit-question-form[data-question-id="${questionId}"]`);
+            // Показываем форму редактирования
+            editForm.style.display = 'block';
+
+            // Устанавливаем edit_question_id в скрытом поле формы
+            const editQuestionIdField = editForm.querySelector('[name="edit_question_id"]');
+            editQuestionIdField.value = questionId;
+        });
+    });
+
+    // JavaScript-код для удаления вопроса при нажатии кнопки "Удалить"
+    const deleteButtons = document.querySelectorAll('.delete-question');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const questionId = button.getAttribute('data-question-id');
+            if (confirm('Вы уверены, что хотите удалить этот вопрос?')) {
+                // Отправляем запрос на удаление вопроса
+                fetch(`/edit_survey/${surveyId}/delete_question/${questionId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Перезагружаем страницу после успешного удаления
+                        window.location.reload();
+                    } else {
+                        // Обрабатываем ошибку удаления
+                        console.error('Произошла ошибка при удалении вопроса.');
+                    }
+                });
+            }
+        });
+    });
+// JavaScript-код для скрытия формы редактирования после сохранения изменений
+const editForms = document.querySelectorAll('.edit-question-form');
+editForms.forEach(form => {
+    form.addEventListener('submit', async (e) => {
+       // e.preventDefault();
+        const questionId = form.getAttribute('data-question-id');
+        const formData = new FormData(form);
+
+        // Отправляем данные на сервер, например, с использованием fetch или axios
+
+        // После успешного сохранения, скрываем форму редактирования
+        form.style.display = 'none';
+    });
+});
+
+
+// JavaScript-код для закрытия формы добавления нового вопроса
+const closeButtons = document.querySelectorAll('.close-form');
+closeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        const parentForm = button.closest('form');
+        parentForm.style.display = 'none';
+    });
+});
+
+// JavaScript-код для отображения формы добавления нового вопроса при нажатии "Добавить еще"
+const addMoreButton = document.getElementById('add-more-questions');
+addMoreButton.addEventListener('click', () => {
+    const newForm = document.getElementById('add-question-form').cloneNode(true);
+    newForm.reset(); // Очищаем содержимое формы
+    newForm.style.display = 'block';
+    addMoreButton.before(newForm);
+});
+</script>
+<script>
+    const csrfToken = "{{ csrf_token }}"; // Получаем CSRF-токен из контекста шаблона
+    const surveyId = "{{ survey.id }}"; // Получаем идентификатор опроса из контекста шаблона
+</script>
+{% endblock %}
+</body>
+</html>
+
