@@ -8,7 +8,7 @@ from rest_framework import generics
 # from MyCareer.models import Vacancy, Messenger
 # from MyCareer.serializers import VacancySerializer
 from MyCareer.forms import UserProfileEditForm, DemandForm, RegistrationForm
-from MyCareer.forms import UserProfile, SurveyForm, QuestionForm, EditQuestionForm
+from MyCareer.forms import UserProfile, SurveyForm, QuestionForm, EditQuestionForm, PasswordResetForm, CustomPasswordChangeForm
 from MyCareer.models import Demand, Counter, Survey, Question, Answer
 from django.views import View
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -17,8 +17,8 @@ import csv
 from django.http import HttpResponse, JsonResponse
 from openpyxl import Workbook
 from datetime import datetime
-
-from api.serializers import UserProfileSerializer
+from .permissions import *
+from api.serializers import UserProfileSerializer, DemandSerializer
 
 
 # def vacancy_list(request):
@@ -715,3 +715,12 @@ def user_answers(request, user_id, survey_id):
 class UserProfileDetailView(generics.RetrieveAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsSuperUserOrTelegramBot]
+
+class DemandDetailView(generics.RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = DemandSerializer
+    permission_classes = [IsSuperUserOrTelegramBot]
+
+#restore_password
+

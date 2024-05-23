@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.db.models import DateTimeField
 from django.dispatch import receiver
+from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 # class CareerCenter(models.Model):
@@ -122,6 +123,7 @@ class Demand(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='demands', blank=True,
                                      null=True)
     date_created = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    #date_updated = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     isArchived = models.BooleanField(blank=True, null=True)
     target = models.TextField()
     stage = models.TextField(blank=True, null=True)
@@ -229,3 +231,5 @@ class StudyDirection(models.Model):
 
     def __str__(self):
         return self.name
+
+

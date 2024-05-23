@@ -27,6 +27,8 @@ from api.urls import *
 
 from blog.views import *
 from social_api.views import *
+from rest_framework import routers
+#from django_rest_passwordreset import views as rest_passwordreset_views
 
 handler403 = 'api.views.error_403'
 handler500 = 'api.views.error_500'
@@ -107,4 +109,6 @@ urlpatterns = [
     path('', include('blog.urls')),
     path('', include('survey_helper.urls')),
     path('api/', include('api.urls')),
+  #  path('password_reset/', rest_passwordreset_views.PasswordResetView.as_view(), name='password_reset'),
+   # path('password_reset/confirm/<uidb64>/<token>/', rest_passwordreset_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 ]

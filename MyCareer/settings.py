@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'survey',
     'survey_helper',
     'EmailBulletin',
-    'social_api'
+    'social_api',
 ]
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': '/my/backup/dir/'}
@@ -155,6 +155,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL='/profile'
 
 REST_FRAMEWORK = {
-
+'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
 }
 

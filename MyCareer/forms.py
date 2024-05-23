@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.forms import ModelChoiceField
 from django.views.generic import FormView
 from django.views.decorators.csrf import csrf_exempt
@@ -110,3 +110,17 @@ class EditQuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = ['text', 'question_type', 'is_mandatory']
+
+class PasswordResetForm(forms.Form):
+    email = forms.EmailField(label='Email')
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not UserProfile.objects.filter(email=email).exists():
+            raise forms.ValidationError('Пользователь с таким email не зарегистрирован')
+        return email
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    class Meta:
+        model = UserProfile
+        fields = ('password1', 'password2')
