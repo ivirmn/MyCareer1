@@ -764,11 +764,13 @@
             {% endfor %}
         </h5>
 
-        {% if show_create_date %}
+        <h5>
+
+    {% if not not_show_create_date %}
         <p>Created on: {{ post.created_at }}</p>
     {% endif %}
 
-    {% if show_edit_date and post.updated_at != post.created_at %}
+    {% if not not_show_create_date and not not_show_edit_date and post.updated_at != post.created_at %}
         <p>Last updated on: {{ post.updated_at }}</p>
     {% endif %}
 

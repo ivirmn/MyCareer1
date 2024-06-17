@@ -19,12 +19,11 @@ class Post(models.Model):
     content = RichTextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    show_create_date = models.BooleanField(null=True, default=False)
+    not_show_create_date = models.BooleanField(null=True, default=False)
     show_edit_date = models.BooleanField(null=True, default=False)
     isPostHidden = models.BooleanField(null=True, default=False)
     tags = models.ManyToManyField(Tag, blank=True)
-    post_to_telegram = models.BooleanField(null=True, default=False)
-    post_to_vk = models.BooleanField(null=True, default=False)
+    no_autopost = models.BooleanField(default=False, null=True, verbose_name="Не постить в соцсети")
 
     # type = models.ManyToField(Type, blank=true)
 
@@ -38,8 +37,7 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         if self.tags.all():
-            tag_slug = self.tags.first().slug
-            return reverse('post_detail', args=[str(tag_slug), str(self.slug)])
+            return reverse('post_detail', args=[str(self.slug)])
         else:
             return reverse('post_list')
 
@@ -68,6 +66,8 @@ class Page(models.Model):
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        return reverse('page_detail', kwargs={'slug': self.slug})
     def __str__(self):
         return f"{self.title} - /{self.slug}"
 

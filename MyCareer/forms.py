@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.forms import ModelChoiceField
 from django.views.generic import FormView
 from django.views.decorators.csrf import csrf_exempt
-from .models import UserProfile, Demand, Survey, Question
+from .models import UserProfile, Demand
 from django.contrib.auth import get_user_model
 
 
@@ -96,20 +96,20 @@ class RegistrationForm(forms.ModelForm):
 
         return cleaned_data
 
-class SurveyForm(forms.ModelForm):
-    class Meta:
-        model = Survey
-        fields = ['title', 'short_description', 'description', 'description_after_passing']
-
-class QuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ['text', 'question_type', 'is_mandatory']
-
-class EditQuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ['text', 'question_type', 'is_mandatory']
+# class SurveyForm(forms.ModelForm):
+#     class Meta:
+#         model = Survey
+#         fields = ['title', 'short_description', 'description', 'description_after_passing']
+#
+# class QuestionForm(forms.ModelForm):
+#     class Meta:
+#         model = Question
+#         fields = ['text', 'question_type', 'is_mandatory']
+#
+# class EditQuestionForm(forms.ModelForm):
+#     class Meta:
+#         model = Question
+#         fields = ['text', 'question_type', 'is_mandatory']
 
 class PasswordResetForm(forms.Form):
     email = forms.EmailField(label='Email')

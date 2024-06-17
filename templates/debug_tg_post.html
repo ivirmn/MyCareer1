@@ -6,14 +6,14 @@
     <p>Telegram Token: {{ tg_token }}</p>
   {% endif %}
 
-  
+  {% if tg_auth_info %}  {# Проверьте, существует ли информация о пользователе #}
     <h2>Авторизованный пользователь</h2>
     <p>ID: {{ tg_user_id }}</p>
     <p>Имя: {{ tg_user_name }}</p>
     <p>Фамилия: {{ tg_user_lastname }}</p>
-  
+  {% endif %}
 
-  {% if tg_auth_info %}
+  {% if tg_auth_info %}  {# Проверьте, существует ли информация об авторизации #}
     <h2>Данные авторизации</h2>
     <pre>{{ tg_auth_info}}</pre>
   {% endif %}
@@ -23,7 +23,7 @@
     <pre>{{ tg_response}}</pre>
   {% endif %}
 
-  {% if tg_request_url %}  {# Проверьте, существует ли URL запроса #}
+  {% if tg_request_url %}  {# Проверьте, существует ли URL запроса на данные авторизации #}
     <h2>URL запроса на данные авторизации</h2>
     <p>{{ tg_request_url }}</p>
   {% endif %}
@@ -41,3 +41,4 @@
 
     <button type="submit">Отправить пост</button>
   </form>
+{% endblock %}

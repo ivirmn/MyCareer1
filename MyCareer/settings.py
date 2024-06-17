@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'bootstrapform',
     'survey',
-    'survey_helper',
     'EmailBulletin',
     'social_api',
 ]

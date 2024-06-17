@@ -6,14 +6,14 @@ from mptt.admin import MPTTModelAdmin
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 class PostAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('title',)}  # Automatically populate the slug field based on the title
+    prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'created_at', 'updated_at', 'isPostHidden')
-    filter_horizontal = ('tags',)  # Add a horizontal filter for tags
+    filter_horizontal = ('tags',)
 
 class PostPage(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('title',)}  # Automatically populate the slug field based on the title
+    prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'created_at', 'updated_at')
-  #  filter_horizontal = ('tags',)  # Add a horizontal filter for tags
+
 
 admin.site.register(Post, PostAdmin)
 admin.site.register(Page, PostPage)

@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.sites import requests
 from django.db import models
 from django.db.models.signals import post_save
 from django.db.models import DateTimeField
 from django.dispatch import receiver
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+import requests
 
 # class CareerCenter(models.Model):
 #     name = models.CharField(max_length=100)
@@ -43,21 +45,20 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     patronymic = models.TextField(null=True, max_length=100)
     vk_id = models.DecimalField(blank=True, null=True, max_digits=12, decimal_places=0)
     phonenumber = models.CharField(null=True, max_length=11)
+    telegram_id = models.TextField(null=True, blank=True, max_length=100)
     other_contacts = models.TextField(blank=True, null=True, max_length=100)
     have_whatsapp = models.BooleanField(null=True, default=False)
     have_telegram = models.BooleanField(null=True, default=False)
     have_viber = models.BooleanField(null=True, default=False)
     is_staff = models.BooleanField(blank=True, null=True, default=False)
-    is_employer = models.BooleanField(blank=True, null=True, default=False)
-    company = models.CharField(null=True, max_length=255, blank=True)
     faculty = models.CharField(null=True, max_length=255, blank=True)
     course = models.DecimalField(blank=True, null=True, max_digits=1, decimal_places=0)
     direction = models.CharField(null=True, max_length=255, blank=True)
     recordbook = models.DecimalField(blank=True, null=True, max_digits=8, decimal_places=0)
     is_ended_study = models.BooleanField(null=True, default=False)
     year_of_ending = models.DecimalField(blank=True, null=True, max_digits=4, decimal_places=0)
+    is_active = models.BooleanField(default=True) # добавлено поле is_active
     objects = UserProfileManager()
-    #agreed_for_tg_bulletins = models.BooleanField(null=True, default=False)
     agreed_for_email_bulletins = models.BooleanField(null=True, default=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -134,6 +135,12 @@ class Demand(models.Model):
         return self.target
 
     def save(self, *args, **kwargs):
+        is_stage_changed = False
+        if self.pk:
+            original_instance = Demand.objects.get(pk=self.pk)
+            if original_instance.stage != self.stage:
+                is_stage_changed = True
+
         if not self.pk:
             user_profile = self.user_profile
             if user_profile:
@@ -145,91 +152,113 @@ class Demand(models.Model):
 
         super().save(*args, **kwargs)
 
+        if is_stage_changed:
+            # отправка сообщения в лс пользователю с id 1837265180
+            chat_id = 1837265180
+            token = "7159365270:AAGh8r8XColkr4gPXXeAb4wwXvuIpT1ksqo"
+            message_text = f"Здравствуйте! Ваша заявка '{self.target}' от '{self.date_created}' изменила статус на '{self.stage}'"
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            data = {"chat_id": chat_id, "text": message_text}
 
-class Counter(models.Model):
-    count = models.IntegerField(default=0)
+            # создание объекта PreparedRequest
+            req = requests.Request('POST', url, data=data).prepare()
 
-    def __str__(self):
-        return str(self.count)
+            # вывод в консоль деталей запроса
+            print(f"Sending Telegram message:")
+            print(f"URL: {req.url}")
+            print(f"Headers: {req.headers}")
+            print(f"Body: {req.body}")
 
-    class Meta:
-        verbose_name_plural = 'Counter'
+            response = requests.post(url, data=data)
+            if response.status_code != 200:
+                print(f"Error sending Telegram message: {response.text}")
+            else:
+                print(f"Success: {response.text}")
 
-
-@receiver(post_save, sender=Demand)
-def update_counter(sender, instance, created, **kwargs):
-    counter, _ = Counter.objects.get_or_create(pk=1)
-    counter.count = Demand.objects.count()
-    counter.save()
+# class Counter(models.Model):
+#     count = models.IntegerField(default=0)
+#
+#     def __str__(self):
+#         return str(self.count)
+#
+#     class Meta:
+#         verbose_name_plural = 'Counter'
+#
+#
+# @receiver(post_save, sender=Demand)
+# def update_counter(sender, instance, created, **kwargs):
+#     counter, _ = Counter.objects.get_or_create(pk=1)
+#     counter.count = Demand.objects.count()
+#     counter.save()
 
 from django.db import models
 
 
-class Survey(models.Model):
-    title = models.CharField(max_length=255)
-    short_description = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    description_after_passing = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.title
-
-
-class Question(models.Model):
-    survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
-    text = models.TextField()
-    is_mandatory = models.BooleanField(null=True, default=True)
-
-    # Добавим поле, которое будет указывать на тип вопроса (текстовый, один выбор, множественный выбор)
-    QUESTION_TYPES = [
-        ('text', 'Текстовый вопрос'),
-        ('single_choice', 'Выбор одного варианта'),
-        ('multiple_choice', 'Выбор нескольких вариантов'),
-    ]
-    question_type = models.CharField(max_length=15, choices=QUESTION_TYPES, default='text')
-
-    def __str__(self):
-        return self.text
+# class Survey(models.Model):
+#     title = models.CharField(max_length=255)
+#     short_description = models.TextField(blank=True, null=True)
+#     description = models.TextField(blank=True, null=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     description_after_passing = models.TextField(blank=True, null=True)
+#
+#     def __str__(self):
+#         return self.title
 
 
-class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    answer_choices = models.JSONField(blank=True, null=True)
-    date_answered = models.DateTimeField(auto_now_add=True)
+# class Question(models.Model):
+#     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
+#     text = models.TextField()
+#     is_mandatory = models.BooleanField(null=True, default=True)
+#
+#     # Добавим поле, которое будет указывать на тип вопроса (текстовый, один выбор, множественный выбор)
+#     QUESTION_TYPES = [
+#         ('text', 'Текстовый вопрос'),
+#         ('single_choice', 'Выбор одного варианта'),
+#         ('multiple_choice', 'Выбор нескольких вариантов'),
+#     ]
+#     question_type = models.CharField(max_length=15, choices=QUESTION_TYPES, default='text')
+#
+#     def __str__(self):
+#         return self.text
 
-    def __str__(self):
-        return f"Answer to '{self.question.text}' by {self.user_profile.email}"
 
-    from django.db import models
+# class Answer(models.Model):
+#     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+#     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+#     answer_choices = models.JSONField(blank=True, null=True)
+#     date_answered = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return f"Answer to '{self.question.text}' by {self.user_profile.email}"
 
-class Faculty(models.Model):
-        name = models.CharField(max_length=100)
+ #   from django.db import models
 
-        def __str__(self):
-            return self.name
+# class Faculty(models.Model):
+#         name = models.CharField(max_length=100)
+#
+#         def __str__(self):
+#             return self.name
 
 
-class StudyDirection(models.Model):
-    name = models.CharField(max_length=100)
-
-    # Добавляем поле для служебного флага
-    # EDUCATION_LEVEL_CHOICES = (
-    #     ('Бакалавриат', 'Бакалавриат'),
-    #     ('Магистратура', 'Магистратура'),
-    #     ('Специалитет', 'Специалитет'),
-    # )
-    # education_level = models.CharField(
-    #     max_length=20,
-    #     choices=EDUCATION_LEVEL_CHOICES,
-    #     default='Бакалавриат',
-    # )
-
-    # Связываем направление с факультетом
-    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
+# class StudyDirection(models.Model):
+#     name = models.CharField(max_length=100)
+#
+#     # Добавляем поле для служебного флага
+#     # EDUCATION_LEVEL_CHOICES = (
+#     #     ('Бакалавриат', 'Бакалавриат'),
+#     #     ('Магистратура', 'Магистратура'),
+#     #     ('Специалитет', 'Специалитет'),
+#     # )
+#     # education_level = models.CharField(
+#     #     max_length=20,
+#     #     choices=EDUCATION_LEVEL_CHOICES,
+#     #     default='Бакалавриат',
+#     # )
+#
+#     # Связываем направление с факультетом
+#     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
+#
+#     def __str__(self):
+#         return self.name
 
 

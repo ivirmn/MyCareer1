@@ -9,7 +9,6 @@ from MyCareer.models import UserProfile
 
 class EmailTemplate(models.Model):
     name = models.CharField(max_length=255)
-    subject = models.CharField(max_length=255)
     body = RichTextField()
 
 

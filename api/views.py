@@ -1,15 +1,17 @@
+from django.contrib.auth import login
+from django.db.models import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, status
 # from MyCareer.models import Vacancy, Messenger
 # from MyCareer.serializers import VacancySerializer
 from MyCareer.forms import UserProfileEditForm, DemandForm, RegistrationForm
-from MyCareer.forms import UserProfile, SurveyForm, QuestionForm, EditQuestionForm, PasswordResetForm, CustomPasswordChangeForm
-from MyCareer.models import Demand, Counter, Survey, Question, Answer
+from MyCareer.forms import UserProfile, PasswordResetForm, CustomPasswordChangeForm
+from MyCareer.models import Demand
 from django.views import View
 from django.contrib.auth.decorators import login_required, user_passes_test
 from rest_framework.permissions import IsAuthenticated
@@ -233,10 +235,11 @@ def create_demand(request):
     return render(request, 'create-demand.html', {'user_profile': user_profile})
 
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def demand_interface(request):
     demands = Demand.objects.all()
-    counter = Counter.objects.first()
+    #counter = Counter.objects.first()
     form = DemandForm()
 
     if request.method == 'POST':
@@ -255,7 +258,7 @@ def demand_interface(request):
     context = {
         'form': form,
         'demands': demands,
-        'counter': counter,
+        #'counter': counter,
         'archived_demands': archived_demands,
         'show_archived': show_archived,
     }
@@ -522,10 +525,9 @@ def register_user(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            # Создание нового пользователя на основе данных из формы
             user = UserProfile.objects.create(
                 email=form.cleaned_data['email'],
-                username=form.cleaned_data['email'],  # Используем email в качестве имени пользователя
+                username=form.cleaned_data['email'],
                 firstname=form.cleaned_data['firstname'],
                 surname=form.cleaned_data['surname'],
                 patronymic=form.cleaned_data['patronymic'],
@@ -536,12 +538,10 @@ def register_user(request):
                 faculty=form.cleaned_data['faculty'],
                 course=form.cleaned_data['course']
             )
-            # Дополнительные действия, если необходимо
-            # ...
-
-            # Перенаправление пользователя после успешной регистрации
-            return redirect(
-                'profile')  # Замените 'registration_success' на URL-шаблон для страницы успешной регистрации
+            user.set_password(form.cleaned_data['password']) # добавлено хеширование пароля
+            user.save()
+            login(request, user)
+            return redirect('profile')
     else:
         form = RegistrationForm()
 
@@ -561,153 +561,153 @@ def register_user(request):
 #     return render(request, 'update_profile.html', {'form': form})
 
 
-def surveys(request):
-    surveys = Survey.objects.all()
-    return render(request, 'surveys.html', {'surveys': surveys})
+# def surveys(request):
+#     surveys = Survey.objects.all()
+#     return render(request, 'surveys.html', {'surveys': surveys})
+#
+# def take_survey(request, survey_id):
+#     survey = Survey.objects.get(pk=survey_id)
+#     return render(request, 'take_survey.html', {'survey': survey})
+#
+#
+# def create_survey(request):
+#     if request.method == 'POST':
+#         form = SurveyForm(request.POST)
+#         if form.is_valid():
+#             # Сохранение опроса, если данные формы действительны
+#             survey = form.save()
+#             return redirect('/index')
+#     else:
+#         # Если это GET-запрос, просто отобразите пустую форму
+#         form = SurveyForm()
+#
+#     return render(request, 'create_survey.html', {'form': form})
+#
+# def create_survey(request):
+#     if request.method == 'POST':
+#         form = SurveyForm(request.POST)
+#         if form.is_valid():
+#             # Сохранение опроса, если данные формы действительны
+#             survey = form.save()
+#             return redirect('/index')
+#     else:
+#         # Если это GET-запрос, просто отобразите пустую форму
+#         form = SurveyForm()
+#
+#     return render(request, 'create_survey.html', {'form': form})
 
-def take_survey(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    return render(request, 'take_survey.html', {'survey': survey})
+# @user_passes_test(lambda u: u.is_superuser)
+# def edit_survey(request, survey_id):
+#     survey = Survey.objects.get(pk=survey_id)
+#     survey_form = SurveyForm(instance=survey)
+#     question_form = QuestionForm()  # Initialize form for creating a new question
+#     edit_question_form = EditQuestionForm()  # Initialize form for editing an existing question
+#     # Получаем общее количество вопросов
+#     question_count = survey.question_set.count()
+#
+#     if request.method == 'POST':
+#         if 'save_survey' in request.POST:
+#             survey_form = SurveyForm(request.POST, instance=survey)
+#             if survey_form.is_valid():
+#                 survey_form.save()
+#         else:
+#             if 'edit_question_id' in request.POST:
+#                 question_id = request.POST.get('edit_question_id')
+#                 question = Question.objects.get(pk=question_id)
+#                 edit_question_form = EditQuestionForm(request.POST, instance=question)
+#             elif 'add_question' in request.POST:  # Добавление нового вопроса
+#                 question_form = QuestionForm(request.POST)
+#                 if question_form.is_valid():
+#                     new_question = question_form.save(commit=False)
+#                     new_question.survey = survey
+#                     new_question.save()
+#                     return redirect('edit_survey', survey_id=survey_id)
+#
+#             if edit_question_form.is_valid():
+#                 edit_question = edit_question_form.save(commit=False)
+#                 edit_question.survey = survey
+#
+#                 # Handle the checkbox value properly
+#                 is_mandatory = request.POST.get('is_mandatory')
+#                 if is_mandatory:
+#                     edit_question.is_mandatory = True
+#                 else:
+#                     edit_question.is_mandatory = False
+#
+#                 edit_question.save()
+#                 return redirect('edit_survey', survey_id=survey_id)
+#
+#     questions = survey.question_set.all()
+#
+#     return render(request, 'edit_survey.html', {
+#         'survey': survey,
+#         'survey_form': survey_form,
+#         'question_form': question_form,
+#         'edit_question_form': edit_question_form,
+#         'questions': questions,
+#         'question_count': question_count
+#     })
+# from django.contrib.auth.decorators import user_passes_test
 
-
-def create_survey(request):
-    if request.method == 'POST':
-        form = SurveyForm(request.POST)
-        if form.is_valid():
-            # Сохранение опроса, если данные формы действительны
-            survey = form.save()
-            return redirect('/index')
-    else:
-        # Если это GET-запрос, просто отобразите пустую форму
-        form = SurveyForm()
-
-    return render(request, 'create_survey.html', {'form': form})
-
-def create_survey(request):
-    if request.method == 'POST':
-        form = SurveyForm(request.POST)
-        if form.is_valid():
-            # Сохранение опроса, если данные формы действительны
-            survey = form.save()
-            return redirect('/index')
-    else:
-        # Если это GET-запрос, просто отобразите пустую форму
-        form = SurveyForm()
-
-    return render(request, 'create_survey.html', {'form': form})
-
-@user_passes_test(lambda u: u.is_superuser)
-def edit_survey(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    survey_form = SurveyForm(instance=survey)
-    question_form = QuestionForm()  # Initialize form for creating a new question
-    edit_question_form = EditQuestionForm()  # Initialize form for editing an existing question
-    # Получаем общее количество вопросов
-    question_count = survey.question_set.count()
-
-    if request.method == 'POST':
-        if 'save_survey' in request.POST:
-            survey_form = SurveyForm(request.POST, instance=survey)
-            if survey_form.is_valid():
-                survey_form.save()
-        else:
-            if 'edit_question_id' in request.POST:
-                question_id = request.POST.get('edit_question_id')
-                question = Question.objects.get(pk=question_id)
-                edit_question_form = EditQuestionForm(request.POST, instance=question)
-            elif 'add_question' in request.POST:  # Добавление нового вопроса
-                question_form = QuestionForm(request.POST)
-                if question_form.is_valid():
-                    new_question = question_form.save(commit=False)
-                    new_question.survey = survey
-                    new_question.save()
-                    return redirect('edit_survey', survey_id=survey_id)
-
-            if edit_question_form.is_valid():
-                edit_question = edit_question_form.save(commit=False)
-                edit_question.survey = survey
-
-                # Handle the checkbox value properly
-                is_mandatory = request.POST.get('is_mandatory')
-                if is_mandatory:
-                    edit_question.is_mandatory = True
-                else:
-                    edit_question.is_mandatory = False
-
-                edit_question.save()
-                return redirect('edit_survey', survey_id=survey_id)
-
-    questions = survey.question_set.all()
-
-    return render(request, 'edit_survey.html', {
-        'survey': survey,
-        'survey_form': survey_form,
-        'question_form': question_form,
-        'edit_question_form': edit_question_form,
-        'questions': questions,
-        'question_count': question_count
-    })
-from django.contrib.auth.decorators import user_passes_test
-
-@user_passes_test(lambda u: u.is_superuser)  # Проверяем, что пользователь - суперпользователь
-def survey_master(request):
-    surveys = Survey.objects.all()  # Получаем список всех опросов
-    total_surveys = surveys.count()
-    return render(request, 'survey-master.html', {'surveys': surveys, 'total_surveys': total_surveys})
-def is_superuser(user):
-    return user.is_superuser
-@user_passes_test(is_superuser)
-def delete_question(request, survey_id, question_id):
-    # Получаем вопрос или вызываем 404 ошибку, если он не существует
-    question = get_object_or_404(Question, pk=question_id)
-
-    if request.method == 'POST':
-        # Удаление вопроса
-        question.delete()
-        return redirect('edit-survey', survey_id=survey_id)  # Используем survey_id
-
-    # Возвращаем шаблон подтверждения удаления
-    return render(request, 'delete-question.html', {'question': question})
-
-
-from django.contrib.auth.decorators import login_required
-
-
-@login_required
-def take_survey(request, survey_id):
-    survey = get_object_or_404(Survey, id=survey_id)
-
-    if request.method == 'POST':
-        for question in survey.question_set.all():
-            answer_data = request.POST.getlist('question_' + str(question.id))
-
-            if answer_data:
-                # Создаем объект Answer для этого вопроса
-                answer = Answer(question=question, user_profile=request.user)
-
-                # Остальной код обработки ответов остается без изменений
-
-                answer.save()
-
-    return render(request, 'take-survey.html', {'survey': survey})
-
-def survey_answers(request, survey_id):
-    survey = Survey.objects.get(pk=survey_id)
-    users_with_answers = Answer.objects.filter(question__survey=survey).values('user_profile').distinct()
-    users_and_answers = []
-
-    for user_with_answer in users_with_answers:
-        user_profile_id = user_with_answer['user_profile']
-        user_profile = UserProfile.objects.get(pk=user_profile_id)
-        users_and_answers.append({'user_profile': user_profile})
-
-    return render(request, 'survey_answers.html', {'survey': survey, 'users_and_answers': users_and_answers})
-
-def user_answers(request, user_id, survey_id):
-    user_answers = Answer.objects.filter(user_profile=user_id, question__survey=survey_id)
-    user_profile = user_answers.first().user_profile
-
-    return render(request, 'user_answers.html', {'user_answers': user_answers, 'user_profile': user_profile})
+# @user_passes_test(lambda u: u.is_superuser)  # Проверяем, что пользователь - суперпользователь
+# def survey_master(request):
+#     surveys = Survey.objects.all()  # Получаем список всех опросов
+#     total_surveys = surveys.count()
+#     return render(request, 'survey-master.html', {'surveys': surveys, 'total_surveys': total_surveys})
+# def is_superuser(user):
+#     return user.is_superuser
+# @user_passes_test(is_superuser)
+# def delete_question(request, survey_id, question_id):
+#     # Получаем вопрос или вызываем 404 ошибку, если он не существует
+#     question = get_object_or_404(Question, pk=question_id)
+#
+#     if request.method == 'POST':
+#         # Удаление вопроса
+#         question.delete()
+#         return redirect('edit-survey', survey_id=survey_id)  # Используем survey_id
+#
+#     # Возвращаем шаблон подтверждения удаления
+#     return render(request, 'delete-question.html', {'question': question})
+#
+#
+# from django.contrib.auth.decorators import login_required
+#
+#
+# @login_required
+# def take_survey(request, survey_id):
+#     survey = get_object_or_404(Survey, id=survey_id)
+#
+#     if request.method == 'POST':
+#         for question in survey.question_set.all():
+#             answer_data = request.POST.getlist('question_' + str(question.id))
+#
+#             if answer_data:
+#                 # Создаем объект Answer для этого вопроса
+#                 answer = Answer(question=question, user_profile=request.user)
+#
+#                 # Остальной код обработки ответов остается без изменений
+#
+#                 answer.save()
+#
+#     return render(request, 'take-survey.html', {'survey': survey})
+#
+# def survey_answers(request, survey_id):
+#     survey = Survey.objects.get(pk=survey_id)
+#     users_with_answers = Answer.objects.filter(question__survey=survey).values('user_profile').distinct()
+#     users_and_answers = []
+#
+#     for user_with_answer in users_with_answers:
+#         user_profile_id = user_with_answer['user_profile']
+#         user_profile = UserProfile.objects.get(pk=user_profile_id)
+#         users_and_answers.append({'user_profile': user_profile})
+#
+#     return render(request, 'survey_answers.html', {'survey': survey, 'users_and_answers': users_and_answers})
+#
+# def user_answers(request, user_id, survey_id):
+#     user_answers = Answer.objects.filter(user_profile=user_id, question__survey=survey_id)
+#     user_profile = user_answers.first().user_profile
+#
+#     return render(request, 'user_answers.html', {'user_answers': user_answers, 'user_profile': user_profile})
 
 
 
@@ -722,5 +722,54 @@ class DemandDetailView(generics.RetrieveAPIView):
     serializer_class = DemandSerializer
     permission_classes = [IsSuperUserOrTelegramBot]
 
+
+class UserActiveDemandsView(generics.ListAPIView):
+    serializer_class = DemandSerializer
+    permission_classes = [IsSuperUserOrTelegramBot]
+
+    def get_queryset(self):
+        telegram_id = self.kwargs['telegram_id']
+        print(f"Received telegram_id: {telegram_id}")
+
+        user = UserProfile.objects.filter(telegram_id=telegram_id).first()
+        if user:
+            print(f"User found: {user.email}")
+            active_demands = user.demands.filter(Q(isArchived=False) | Q(isArchived__isnull=True))
+            print(f"Active demands count: {active_demands.count()}")
+            return active_demands
+        else:
+            print(f"No user found with telegram_id: {telegram_id}")
+
+        return Demand.objects()
+
+@api_view(['POST'])
+#@permission_classes([IsAuthenticated])
+def create_demand_api(request):
+    data = request.data
+    telegram_id = data.get('telegram_id')
+    target = data.get('target')
+
+    try:
+        user_profile = UserProfile.objects.get(telegram_id=telegram_id)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User not found. Please login first.'}, status=400)
+
+    demand = Demand.objects.create(
+        user_profile=user_profile,
+        target=target
+    )
+
+    serializer = DemandSerializer(demand)
+    return Response({'success': True, 'demand': serializer.data})
+
+class DemandDeleteView(generics.DestroyAPIView):
+    queryset = Demand.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = DemandSerializer
+
+    def delete(self, request, *args, **kwargs):
+        demand = self.get_object()
+        self.perform_destroy(demand)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 #restore_password
 

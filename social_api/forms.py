@@ -17,3 +17,8 @@ class TgApiAutopostForm(forms.ModelForm):
 class DebugVKPostForm(forms.Form):
     title = forms.CharField(max_length=200, label='Заголовок')
     content = forms.CharField(widget=forms.Textarea, label='Содержимое')
+
+
+class DebugTGPostForm(forms.Form):
+    title = forms.CharField(max_length=200, label='Заголовок')
+    content = forms.CharField(widget=forms.Textarea, label='Содержимое')

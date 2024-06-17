@@ -94,7 +94,7 @@ urlpatterns = [
    # path('survey/<int:survey_id>/', views.take_survey, name='take_survey'),
     #path('create-survey/', views.create_survey, name='create_survey'),
    # path('edit-survey/<int:survey_id>/', views.edit_survey, name='edit_survey'),
-    path('survey-master/', views.survey_master, name='survey_master'),
+    #path('survey-master/', views.survey_master, name='survey_master'),
    # path('edit-survey/<int:survey_id>/delete-question/<int:question_id>/', views.delete_question, name='delete_question'),
    # path('take-survey/<int:survey_id>/', views.take_survey, name='take_survey'),
     path('article-editor/', views.article_editor, name='article_editor'),
@@ -107,8 +107,8 @@ urlpatterns = [
     #path('post/<slug:slug>/', BlogDetailView.as_view(), name='post_detail'),
         #include blog paths
     path('', include('blog.urls')),
-    path('', include('survey_helper.urls')),
     path('api/', include('api.urls')),
+    path('bulletin/', include('EmailBulletin.urls')),
   #  path('password_reset/', rest_passwordreset_views.PasswordResetView.as_view(), name='password_reset'),
    # path('password_reset/confirm/<uidb64>/<token>/', rest_passwordreset_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 ]
