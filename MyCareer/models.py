@@ -8,7 +8,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 import requests
-
+import random
+import string
 # class CareerCenter(models.Model):
 #     name = models.CharField(max_length=100)
 #     description = models.TextField()
@@ -46,6 +47,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     vk_id = models.DecimalField(blank=True, null=True, max_digits=12, decimal_places=0)
     phonenumber = models.CharField(null=True, max_length=11)
     telegram_id = models.TextField(null=True, blank=True, max_length=100)
+    telegram_code = models.CharField(null=True, blank=True, max_length=100)
     other_contacts = models.TextField(blank=True, null=True, max_length=100)
     have_whatsapp = models.BooleanField(null=True, default=False)
     have_telegram = models.BooleanField(null=True, default=False)
@@ -63,6 +65,11 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
+    def generate_telegram_code(self):
+        code = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+        self.telegram_code = code
+        self.save()
+        return code
     def __str__(self):
         return self.email
 

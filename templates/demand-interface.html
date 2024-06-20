@@ -1,89 +1,167 @@
 {% extends "base_admin.html" %}
-{% csrf_token %}
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-  {% load static %}
-  <title>{% block title %}Список заявок{% endblock %}</title>
-
-  <script>
-    // Функция для получения CSRF-токена из cookie
-    function getCSRFToken() {
-      var csrfToken = null;
-      var cookies = document.cookie.split(';');
-      for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i].trim();
-        if (cookie.indexOf('csrftoken=') === 0) {
-          csrfToken = cookie.substring('csrftoken='.length, cookie.length);
-          break;
-        }
-      }
-      return csrfToken;
-    }
-  
-    // JavaScript для редактирования ячеек и отправки POST-запроса
-    $('td.stage, td.result, td.comment').on('blur', function() {
-        var cell = $(this);
-        var newValue = cell.text().trim();
-        var demandId = cell.closest('tr').data('demand-id');
-        var columnName = cell.data('column-name');
-        var csrftoken = getCSRFToken();
-
-        // Отправьте AJAX-запрос на сервер для обновления данных
-        $.ajax({
-            type: 'POST',
-            url: '/update-demand/' + demandId + '/',
-            data: {
-                column_name: columnName,
-                new_value: newValue,
-                csrfmiddlewaretoken: csrftoken
-            },
-            success: function(data) {
-                console.log('Значение успешно обновлено: ' + newValue);
-            },
-            error: function() {
-                console.log('Не удалось обновить значение: ' + newValue);
-            }
-        });
-    });
-  </script>
+    <title>{% block title %}Список заявок{% endblock %}</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
   {% block content %}
-  <h2>Всего заявок: {{ counter.count }}</h2>
-  <button id="resetSortButton">Сбросить сортировку</button>
-  <button id="hideActiveButton">Скрыть активные заявки</button>
-  <button id="showActiveButton" style="display: none;">Показать активные заявки</button>
-  <button id="hideArchiveButton" style="display: none;">Скрыть архивные заявки</button>
-  <button id="showArchiveButton">Показать архивированные заявки</button>
+   <!-- Скрипт для изменения полей с подтверждением -->
+   <script>
+    $(document).ready(function() {
+        $('.stage, .result, .comment').on('blur', function() {
+            var demandId = $(this).data('demand-id');
+            var columnName = $(this).data('column-name');
+            var newValue = $(this).text();
+            var oldValue = $(this).data('old-value');
 
-  <h2>Активные заявки:</h2>
-    <table id="activeTable">
-      <thead>
+            if (newValue !== oldValue) {
+                if (confirm('Сменить ли ' + columnName + ' с "' + oldValue + '" на "' + newValue + '"?')) {
+                    $.ajax({
+                        url: '{% url "update_demand" 0 %}'.replace('0', demandId),
+                        type: 'POST',
+                        data: {
+                            'column_name': columnName,
+                            'value': newValue,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                alert('Изменение успешно сохранено!');
+                            } else {
+                                alert('Ошибка при сохранении: ' + response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Ошибка при отправке данных на сервер.');
+                        }
+                    });
+                } else {
+                    $(this).text(oldValue);
+                }
+            }
+        });
+
+        $('.stage, .result, .comment').each(function() {
+            $(this).data('old-value', $(this).text());
+        });
+    });
+</script>
+
+<!-- Скрипт для алфавитной сортировки по столбцам -->
+<script>
+    $(document).ready(function() {
+        $('.sortable').on('click', function() {
+            var table = $(this).parents('table').eq(0);
+            var rows = table.find('tr:gt(0)').toArray().sort(comparer($(this).index()));
+            this.asc = !this.asc;
+            if (!this.asc) {
+                rows = rows.reverse();
+            }
+            for (var i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
+            }
+            $(this).find('.sortico').toggleClass('rotate');
+        });
+
+        function comparer(index) {
+            return function(a, b) {
+                var valA = getCellValue(a, index), valB = getCellValue(b, index);
+                return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            };
+        }
+
+        function getCellValue(row, index) {
+            return $(row).children('td').eq(index).text();
+        }
+    });
+</script>
+
+<!-- Скрипт для сброса сортировки -->
+<script>
+    $(document).ready(function() {
+        $('#resetSortButton').on('click', function() {
+            var table = $('#activeTable');
+            var rows = table.find('tr:gt(0)').toArray().sort(function(a, b) {
+                return $(a).data('demand-id') - $(b).data('demand-id');
+            });
+            for (var i = 0; i < rows.length; i++) {
+                table.append(rows[i]);
+            }
+            $('.sortico').removeClass('rotate');
+        });
+    });
+</script>
+
+<!-- Скрипт для скрытия/показа активных заявок -->
+<script>
+    $(document).ready(function() {
+        $('#hideActiveButton').on('click', function() {
+            $('#activeTable').hide();
+            $('#hideActiveButton').hide();
+            $('#showActiveButton').show();
+        });
+        $('#showActiveButton').on('click', function() {
+            $('#activeTable').show();
+            $('#hideActiveButton').show();
+            $('#showActiveButton').hide();
+        });
+    });
+</script>
+
+<!-- Скрипт для скрытия/показа архивированных заявок -->
+<script>
+    $(document).ready(function() {
+        $('#showArchiveButton').on('click', function() {
+            $('#archiveTable').show();
+            $('#archiveHeader').show();
+            $('#showArchiveButton').hide();
+            $('#hideArchiveButton').show();
+        });
+        $('#hideArchiveButton').on('click', function() {
+            $('#archiveTable').hide();
+            $('#archiveHeader').hide();
+            $('#showArchiveButton').show();
+            $('#hideArchiveButton').hide();
+        });
+    });
+</script>
+<h2>Всего заявок: {{ counter.count }}</h2>
+<button id="resetSortButton">Сбросить сортировку</button>
+<button id="hideActiveButton">Скрыть активные заявки</button>
+<button id="showActiveButton" style="display: none;">Показать активные заявки</button>
+<button id="hideArchiveButton" style="display: none;">Скрыть архивные заявки</button>
+<button id="showArchiveButton">Показать архивированные заявки</button>
+
+<h2>Активные заявки:</h2>
+<table id="activeTable">
+    <thead>
         <tr>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Дата</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Имя</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Номер телефона, e-mail</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Мессенджеры</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Факультет, курс</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Цель</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Стадия</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Результат</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Комментарий</th>
-          <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Действия</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Дата</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Имя</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Номер телефона, e-mail</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Мессенджеры</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Факультет, курс</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Цель</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Стадия</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Результат</th>
+            <th class="sortable"><img class="sortico" src="{% static 'img/sort-up.svg' %}">Комментарий</th>
+            <th>Действия</th>
         </tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody>
         {% for demand in demands %}
         {% if not demand.is_archived %}
-          <tr class="active-row" data-demand-id="{{ demand.id }}">
+        <tr class="active-row" data-demand-id="{{ demand.id }}">
             <td>{{ demand.date_created|date:"Y-m-d H:i" }}</td>
             <td>{{ demand.user_profile.firstname }} {{ demand.user_profile.surname }} {{ demand.user_profile.patronymic }}</td>
             <td><a href="tel:{{ demand.user_profile.phonenumber }}">{{ demand.user_profile.phonenumber }} </a> <br> <a href="mailto:{{ demand.user_profile.email }}">{{ demand.user_profile.email }}</a></td>
             <td>
-              {% if demand.user_profile.have_viber %} Viber, {% endif %}
-              {% if demand.user_profile.have_telegram %} Telegram, {% endif %}
-              {% if demand.user_profile.have_whatsapp %} <a href="https://wa.me/{{ demand.user_profile.phonenumber }}">WhatsApp</a> {% endif %}
+                {% if demand.user_profile.have_viber %} Viber, {% endif %}
+                {% if demand.user_profile.have_telegram %} Telegram, {% endif %}
+                {% if demand.user_profile.have_whatsapp %} <a href="https://wa.me/{{ demand.user_profile.phonenumber }}">WhatsApp</a> {% endif %}
             </td>
             <td>{{ demand.user_profile.faculty }}, {{ demand.user_profile.course }} курс</td>
             <td>{{ demand.target }}</td>
@@ -91,13 +169,57 @@
             <td class="result" data-demand-id="{{ demand.id }}" data-column-name="result" style="cursor: pointer;" contenteditable="true">{{ demand.result }}</td>
             <td class="comment" data-demand-id="{{ demand.id }}" data-column-name="comment" style="cursor: pointer;" contenteditable="true">{{ demand.comment }}</td>
             <td>
-              <a href="{% url 'delete_demand' demand.id %}" class="delete">Удалить</a>
+                <a href="{% url 'delete_demand' demand.id %}" class="delete">Удалить</a>
+                <a href="{% url 'archive_demand' demand.id %}" class="archive">Архивировать</a>
             </td>
-          </tr>
+        </tr>
         {% endif %}
         {% endfor %}
-      </tbody>
-    </table>
-    {% endblock %}
-  </body>
+    </tbody>
+</table>
+
+<h2 style="display:none;" id="archiveHeader">Архивированные заявки:</h2>
+<table id="archiveTable" style="display:none;">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Имя</th>
+            <th>Номер телефона, e-mail</th>
+            <th>Мессенджеры</th>
+            <th>Факультет, курс</th>
+            <th>Цель</th>
+            <th>Стадия</th>
+            <th>Результат</th>
+            <th>Комментарий</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for demand in demands %}
+        {% if demand.is_archived %}
+        <tr class="archived-row">
+            <td>{{ demand.date_created|date:"Y-m-d H:i" }}</td>
+            <td>{{ demand.user_profile.firstname }} {{ demand.user_profile.surname }} {{ demand.user_profile.patronymic }}</td>
+            <td><a href="tel:{{ demand.user_profile.phonenumber }}">{{ demand.user_profile.phonenumber }}</a> <br> <a href="mailto:{{ demand.user_profile.email }}">{{ demand.user_profile.email }}</a></td>
+            <td>
+                {% if demand.user_profile.have_viber %} Viber, {% endif %}
+                {% if demand.user_profile.have_telegram %} Telegram, {% endif %}
+                {% if demand.user_profile.have_whatsapp %} <a href="https://wa.me/{{ demand.user_profile.phonenumber }}">WhatsApp</a> {% endif %}
+            </td>
+            <td>{{ demand.user_profile.faculty }}, {{ demand.user_profile.course }} курс</td>
+            <td>{{ demand.target }}</td>
+            <td>{{ demand.stage }}</td>
+            <td>{{ demand.result }}</td>
+            <td>{{ demand.comment }}</td>
+            <td>
+                <a href="{% url 'delete_demand' demand.id %}" class="delete">Удалить</a>
+                <a href="{% url 'unarchive_demand' demand.id %}" class="unarchive">Активировать</a>
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+  {% endblock %}
+</body>
 </html>

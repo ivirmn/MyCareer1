@@ -24,7 +24,8 @@ from drf_yasg.views import get_schema_view
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
 from api.urls import *
-
+from django.conf import settings
+from django.conf.urls.static import static
 from blog.views import *
 from social_api.views import *
 from rest_framework import routers
@@ -111,4 +112,4 @@ urlpatterns = [
     path('bulletin/', include('EmailBulletin.urls')),
   #  path('password_reset/', rest_passwordreset_views.PasswordResetView.as_view(), name='password_reset'),
    # path('password_reset/confirm/<uidb64>/<token>/', rest_passwordreset_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

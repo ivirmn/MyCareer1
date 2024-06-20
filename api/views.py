@@ -1,7 +1,8 @@
 from django.contrib.auth import login
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.http import require_POST
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -14,13 +15,14 @@ from MyCareer.forms import UserProfile, PasswordResetForm, CustomPasswordChangeF
 from MyCareer.models import Demand
 from django.views import View
 from django.contrib.auth.decorators import login_required, user_passes_test
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 import csv
 from django.http import HttpResponse, JsonResponse
 from openpyxl import Workbook
 from datetime import datetime
 from .permissions import *
 from api.serializers import UserProfileSerializer, DemandSerializer
+from django.utils.crypto import get_random_string
 
 
 # def vacancy_list(request):
@@ -220,6 +222,19 @@ def edit_user_profile(request):
 def create_demand(request):
     user_profile = UserProfile.objects.get(email=request.user.email)
 
+    # Проверяем, есть ли у пользователя привязанный Telegram ID
+    if not user_profile.telegram_id:
+        # Генерируем временный токен для привязки Telegram
+        telegram_token = get_random_string(length=16)
+        user_profile.telegram_code = telegram_token
+        user_profile.save()
+
+        # Сгенерируем ссылку для привязки Telegram
+        telegram_link = request.build_absolute_uri(reverse('user-by-token', args=[telegram_token]))
+
+        # Передаем токен и ссылку в шаблон для создания заявки
+        return render(request, 'create-demand.html', {'user_profile': user_profile, 'telegram_token': telegram_token, 'telegram_link': telegram_link})
+
     if request.method == 'POST':
         target = request.POST.get('target')
 
@@ -234,12 +249,9 @@ def create_demand(request):
 
     return render(request, 'create-demand.html', {'user_profile': user_profile})
 
-
-
 @user_passes_test(lambda u: u.is_superuser)
 def demand_interface(request):
     demands = Demand.objects.all()
-    #counter = Counter.objects.first()
     form = DemandForm()
 
     if request.method == 'POST':
@@ -248,65 +260,41 @@ def demand_interface(request):
             form.save()
 
     show_archived = request.GET.get('show_archived')  # Получение значения параметра show_archived из URL
-
-    # Фильтрация заявок на основе параметра show_archived
-    if show_archived:
-        archived_demands = Demand.objects.filter(isArchived=True)
-    else:
-        archived_demands = None
+    archived_demands = Demand.objects.filter(isArchived=True) if show_archived else None
 
     context = {
         'form': form,
         'demands': demands,
-        #'counter': counter,
         'archived_demands': archived_demands,
         'show_archived': show_archived,
     }
     return render(request, 'demand-interface.html', context)
-
-
-# def update_demand(request, demand_id):
-#     demand = Demand.objects.get(id=demand_id)
-#     if request.method == 'POST':
-#         stage = request.POST.get('stage')
-#         result = request.POST.get('result')
-#
-#         demand.stage = stage
-#         demand.result = result
-#         demand.save()
-#
-#     return redirect('demand_interface')
-
+@user_passes_test(lambda u: u.is_superuser)
 def update_demand(request, demand_id):
-    if request.method == "POST":
-        new_stage = request.POST.get('stage')
-        new_result = request.POST.get('result')
-        new_comment = request.POST.get('comment')
+    if request.method == 'POST':
+        demand = get_object_or_404(Demand, id=demand_id)
+        field_name = request.POST.get('column_name')
+        new_value = request.POST.get('value')
 
-        try:
-            demand = Demand.objects.get(pk=demand_id)
-            demand.stage = new_stage
-            demand.result = new_result
-            demand.comment = new_comment
+        if field_name in ['stage', 'result', 'comment']:
+            setattr(demand, field_name, new_value)
             demand.save()
-            return JsonResponse({'success': True})
-        except Demand.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Заявка не найдена'})
-
-    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
-
+            return JsonResponse({'status': 'success'})
+        return JsonResponse({'status': 'error', 'message': 'Invalid field name'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+@user_passes_test(lambda u: u.is_superuser)
 def delete_demand(request, demand_id):
     demand = Demand.objects.get(id=demand_id)
     demand.delete()
-
     return redirect('demand_interface')
-
-
+@user_passes_test(lambda u: u.is_superuser)
 def archive_demand(request, demand_id):
-    demand = get_object_or_404(Demand, pk=demand_id)
-    demand.isArchived = True
-    demand.save()
-    return redirect('demand_interface')
+    if request.method == 'GET':
+        demand = get_object_or_404(Demand, id=demand_id)
+        demand.is_archived = True
+        demand.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -743,7 +731,7 @@ class UserActiveDemandsView(generics.ListAPIView):
         return Demand.objects()
 
 @api_view(['POST'])
-#@permission_classes([IsAuthenticated])
+@permission_classes([IsSuperUserOrTelegramBot])
 def create_demand_api(request):
     data = request.data
     telegram_id = data.get('telegram_id')
@@ -764,12 +752,22 @@ def create_demand_api(request):
 
 class DemandDeleteView(generics.DestroyAPIView):
     queryset = Demand.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsSuperUserOrTelegramBot]
     serializer_class = DemandSerializer
 
     def delete(self, request, *args, **kwargs):
         demand = self.get_object()
         self.perform_destroy(demand)
         return Response(status=status.HTTP_204_NO_CONTENT)
+class UserProfileByTokenView(generics.RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsSuperUserOrTelegramBot]
+
+    def get(self, request, *args, **kwargs):
+        token = self.kwargs.get('token')
+        user_profile = UserProfile.objects.filter(telegram_code=token).first()
+        if user_profile:
+            return Response(UserProfileSerializer(user_profile).data)
+        return Response({'error': 'User not found'}, status=404)
 #restore_password
 

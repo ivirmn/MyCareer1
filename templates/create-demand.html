@@ -751,57 +751,27 @@
       </div>
     </div>
     <div class="content-block">
-     <!-- <form><button class="button_save" id="button_save_editprofile"> <p class=p-myprofilebutton>Редактировать профиль</p> </div>  </form>
-        <form><button class="button_save" id="button_save_exit"> <p class=p-myprofilebutton>Выйти</p> </div> </form> -->
-          {% block content %}
-          <h2>Создать заявку</h2>
-        
-          <form method="post" action="{% url 'create_demand' %}">
-            {% csrf_token %}
-            <label for="target">Цель заявки:</label>
-            <textarea name="target" id="target" rows="4" cols="50" required></textarea>
-            <br>
-            <input type="submit" value="Создать заявку">
-          </form>
+        {% block content %}
+            {% if not user_profile.userprofile.telegram_id %}
+                <h2>Создать заявку</h2>
+                <form method="post" action="{% url 'create_demand' %}">
+                    {% csrf_token %}
+                    <label for="target">Цель заявки:</label>
+                    <textarea name="target" id="target" rows="4" cols="50" required></textarea>
+                    <br>
+                    <input type="submit" value="Создать заявку">
+                </form>
+                <p>Для подачи заявки, пожалуйста, привяжите ваш профиль Telegram.</p>
+                <p>Ссылка: <a href="https://t.me/vsucarbot?start=bind_{{telegram_token}}">https://t.me/vsucarbot?start=bind_{{telegram_token}}</a></p>
+                <p>Ваш токен для привязки Telegram: {{ telegram_token }}</p>
+            {% else %}
+                <p>У вас уже привязан профиль Telegram.</p>
+            {% endif %}
         {% endblock %}
     </div>
+    
     <br><br><br><br>
-  <!--  <div class="menu-bar1 col-md-6 col-xl-12 order-md-0 order-xl-1" style="display: inline-block;">
-        <h3>Темы</h3>
-        <a id="1"></a>
-        <br><br>
-        <a id="2"></a>
-        <br><br>
-        <a id="3"></a>
-        <br><br>
-        <a id="4"></a>
-        <br>
-        <br>
-        <div class="line"></div>
-        <br>
-        <a class="down-topic" href="">Все тематики</a>
-        <br>
-    </div>
-    <div class="article1" style="display: inline-block;">
-        <a class="h-f" id="h-f"></a>
-        <div class="line1"></div>
-        <p class="main-text1" id="main-text1"></p>
-
-    </div>
-    <div class="article2 col-md-6 col-xl-12 order-md-0 order-xl-1" style="display: inline-block;">
-        <a class="h-s" id="h-s"></a>
-        <div class="line1"></div>
-        <p class="main-text" id="main-text"></p>
-
-    </div>
-    <br><br><br><br><br><br>
-</main>
--->
-<!-- <div class="warning warning--active">
-	<div class="warning__text">Привет, это журнал «Код»! Мы используем куки.</div>
-	<button class="warning__apply" type="button">OK</button>
-	<a class="warning__read" href="https://ru.wikipedia.org/wiki/Cookie" target="_blank">Что такое куки</a>
-</div> -->
+  
 <footer>
     <div class="container footer">
         <p class="p2023">Made with love at CSF VSU in 2023. Contact: <a id="mailto" href="mailto:vsucareer@gmail.com"> vsucareer@gmail.com </a> </p>
